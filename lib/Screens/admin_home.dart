@@ -1168,7 +1168,9 @@ class _AdminHomeState extends State<AdminHome> {
                                       "Admin Password Updated Successfully",
                                       Colors.green,
                                     );
-                                    refetch?.call();
+                                    OldPasswordController.clear();
+                                    NewPasswordController.clear();
+                                    ConfirmPasswordController.clear();
                                   },
                                   onError: (error) {
                                     _showSnackBar(
@@ -1190,7 +1192,9 @@ class _AdminHomeState extends State<AdminHome> {
                                           "Credential Updated Successfully",
                                           Colors.green,
                                         );
-                                        refetch?.call();
+                                        credUsername.clear();
+                                        credPassword.clear();
+                                        stakeType = "Kitchen";
                                       },
                                       onError: (error) {
                                         _showSnackBar(
@@ -1277,9 +1281,6 @@ class _AdminHomeState extends State<AdminHome> {
                                                   NewPasswordController.text,
                                               "HotelName": widget.HotelName,
                                             });
-                                            OldPasswordController.clear();
-                                            NewPasswordController.clear();
-                                            ConfirmPasswordController.clear();
                                           } else {
                                             _showSnackBar(
                                               context,
