@@ -48,7 +48,7 @@ void main() async {
   );
 
   final HttpLink httpLink = HttpLink(
-    'http://localhost:4000/graphql',
+    'https://hotel-desktop-back-end-fl84.vercel.app/graphql',
     httpClient: httpClientWithTimeout,
   );
 

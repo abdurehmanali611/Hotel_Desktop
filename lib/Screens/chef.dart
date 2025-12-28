@@ -102,7 +102,7 @@ class _ChefState extends State<Chef> {
     } else {
       _showSnackBar(
         context,
-        "Version Info is not available.",
+        "Coming Soon...",
         const Color.fromARGB(255, 110, 105, 53),
       );
     }
