@@ -1,14 +1,8 @@
 // ignore_for_file: non_constant_identifier_names
 
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
-import 'package:hotcol/main.dart';
 import 'package:hotcol/utils/apptheme.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:upgrader/upgrader.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class Barista extends StatefulWidget {
   final String HotelName;
@@ -20,9 +14,7 @@ class Barista extends StatefulWidget {
 }
 
 class _BaristaState extends State<Barista> {
-  @override
-  Widget build(BuildContext context) {
-    final String barOrderQuery = """
+  final String barOrderQuery = """
   query {
   orders {
   id 
@@ -40,7 +32,7 @@ class _BaristaState extends State<Barista> {
   }
 """;
 
-    final String statusUpdateMutation = """
+  final String statusUpdateMutation = """
   mutation UpdateStatus(\$id: Int!, \$status: String) {
   UpdateStatus(id: \$id, status: \$status) {
   id
@@ -49,100 +41,30 @@ class _BaristaState extends State<Barista> {
   }
 """;
 
-  void checkForUpdate(String latestVersion) {
-    String updateUrl = Platform.isWindows ? "" : "";
-    CupertinoAlertDialog(
-      title: Text(
-        "Update Available",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      content: Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Text(
-          "A new version of the app is available. version $latestVersion, please update to continue.",
-          style: TextStyle(fontSize: 16),
-        ),
-      ),
-      actions: [
-        CupertinoDialogAction(
-          onPressed: () async {
-            Uri uri = Uri.parse(updateUrl);
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri);
-            } else {
-              _showSnackBar(
-                context,
-                "Couldn't open the Update Link",
-                Colors.red,
-              );
-            }
-          },
-          child: Text(
-            "Update Now",
-            style: TextStyle(color: CupertinoColors.activeBlue),
-          ),
-        ),
-      ],
-    );
-  }
-
-  checkForVersionUpdate() {
-    final storedVersion = upgrader.versionInfo?.appStoreVersion;
-    final installedVersion = upgrader.versionInfo?.installedVersion;
-
-    if (storedVersion != null && installedVersion != null) {
-      if (storedVersion > installedVersion) {
-        checkForUpdate(storedVersion.toString());
-      } else {
-        _showSnackBar(
-          context,
-          "You are using the latest version.",
-          Colors.green,
-        );
-      }
-    } else {
-      _showSnackBar(
-        context,
-        "Coming Soon...",
-        const Color.fromARGB(255, 110, 105, 53),
-      );
-    }
-  }
-
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Apptheme.loginscaffold,
       appBar: AppBar(
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(90),
+              child: Image(
+                image: Image.network(widget.Logo).image,
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+              ),
+            ),
+            SizedBox(width: 10),
             Text(
-              "${widget.HotelName} Admin Panel",
+              "${widget.HotelName} Barista Panel",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 fontFamily: "NotoSerif",
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Future.delayed(Duration(seconds: 2)).then((value) {
-                  checkForVersionUpdate();
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Apptheme.buttontxt,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(90),
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(90),
-                child: Image(
-                  image: Image.network(widget.Logo).image,
-                  width: 20,
-                  height: 50,
-                  fit: BoxFit.cover,
-                ),
               ),
             ),
           ],
@@ -216,141 +138,153 @@ class _BaristaState extends State<Barista> {
                     },
                   ),
                   builder: (RunMutation runMutation, QueryResult? result) {
-                    return ListView.builder(
-                      itemCount: filteredItems.length,
-                      itemBuilder: (context, index) {
-                        final item = filteredItems.elementAt(index);
-                        return Container(
-                          width: 250,
-                          height: 440,
-                          padding: const EdgeInsets.all(25),
-                          margin: const EdgeInsets.symmetric(
-                            horizontal: 450,
-                            vertical: 80,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(20),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(0.3),
-                                spreadRadius: 5,
-                                blurRadius: 10,
-                                offset: const Offset(0, 5),
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(
-                                item['title'],
-                                style: TextStyle(
-                                  fontSize: 28,
-                                  fontWeight: FontWeight.bold,
-                                  fontFamily: "NotoSerif",
-                                  color: Apptheme.mosttxtcolor,
+                    return SizedBox(
+                      width: double.infinity,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 80),
+                        itemCount: filteredItems.length,
+                        itemBuilder: (context, index) {
+                          final item = filteredItems.elementAt(index);
+                          return Container(
+                            width: 250,
+                            height: 440,
+                            padding: const EdgeInsets.all(25),
+                            margin: const EdgeInsets.symmetric(
+                              horizontal: 80,
+                              vertical: 40,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(0.3),
+                                  spreadRadius: 5,
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 5),
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 15),
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: Image.network(
-                                  item['imageUrl'],
-                                  width: 250,
-                                  height: 220,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Icon(Icons.broken_image, size: 200);
-                                  },
+                              ],
+                            ),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  item['title'],
+                                  style: TextStyle(
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.bold,
+                                    fontFamily: "NotoSerif",
+                                    color: Apptheme.mosttxtcolor,
+                                  ),
+                                  textAlign: TextAlign.center,
                                 ),
-                              ),
-                              const SizedBox(height: 15),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    "Table No:",
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Apptheme.mosttxtcolor,
-                                    ),
-                                  ),
-                                  Text(
-                                    " ${item['tableNo']}",
-                                    style: TextStyle(
-                                      fontSize: 20,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 25),
-                              Row(
-                                children: [
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      runMutation({
-                                        "id": item['id'],
-                                        "status": "Cancelled",
-                                      });
+                                const SizedBox(height: 15),
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(20),
+                                  child: Image.network(
+                                    item['imageUrl'],
+                                    width: 250,
+                                    height: 220,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Icon(
+                                        Icons.broken_image,
+                                        size: 200,
+                                      );
                                     },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Apptheme.buttonbglogin,
-                                      foregroundColor: Apptheme.buttontxt,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 40,
-                                        vertical: 15,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(30),
-                                      ),
-                                      elevation: 5,
-                                    ),
-                                    child: const Text(
-                                      "Cancel",
+                                  ),
+                                ),
+                                const SizedBox(height: 15),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      "Table No:",
                                       style: TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
+                                        color: Apptheme.mosttxtcolor,
                                       ),
                                     ),
-                                  ),
-                                  ElevatedButton(
-                                    onPressed: () {
-                                      runMutation({
-                                        "id": item['id'],
-                                        "status": "Completed",
-                                      });
-                                    },
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Apptheme.buttonbglogin,
-                                      foregroundColor: Apptheme.buttontxt,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 40,
-                                        vertical: 15,
-                                      ),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(30),
-                                      ),
-                                      elevation: 5,
-                                    ),
-                                    child: const Text(
-                                      "Done",
+                                    Text(
+                                      " ${item['tableNo']}",
                                       style: TextStyle(
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold,
+                                        color: Colors.black,
                                       ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                                  ],
+                                ),
+                                const SizedBox(height: 25),
+                                Row(
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        runMutation({
+                                          "id": item['id'],
+                                          "status": "Cancelled",
+                                        });
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Apptheme.buttonbglogin,
+                                        foregroundColor: Apptheme.buttontxt,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 40,
+                                          vertical: 15,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            30,
+                                          ),
+                                        ),
+                                        elevation: 5,
+                                      ),
+                                      child: const Text(
+                                        "Cancel",
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () {
+                                        runMutation({
+                                          "id": item['id'],
+                                          "status": "Completed",
+                                        });
+                                      },
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: Apptheme.buttonbglogin,
+                                        foregroundColor: Apptheme.buttontxt,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 40,
+                                          vertical: 15,
+                                        ),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            30,
+                                          ),
+                                        ),
+                                        elevation: 5,
+                                      ),
+                                      child: const Text(
+                                        "Done",
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
                     );
                   },
                 );
@@ -358,15 +292,5 @@ class _BaristaState extends State<Barista> {
         ),
       ),
     );
-  }
-  void _showSnackBar(BuildContext context, String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: Duration(seconds: 2),
-        backgroundColor: color,
-      ),
-    );
-    // ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 }

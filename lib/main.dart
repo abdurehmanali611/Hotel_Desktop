@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'package:upgrader/upgrader.dart';
 
 class CustomHttpClient extends http.BaseClient {
   final http.Client _inner = http.Client();
@@ -25,13 +24,10 @@ class CustomHttpClient extends http.BaseClient {
   }
 }
 
-final Upgrader upgrader = Upgrader(debugDisplayAlways: true, debugLogging: true);
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initHiveForFlutter();
-  upgrader.initialize();
-  await Upgrader.clearSavedSettings();
  
   final Duration timeoutDuration = const Duration(seconds: 30);
 

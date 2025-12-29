@@ -3,7 +3,6 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter/cupertino.dart';
 import 'package:hotcol/Recode/UpdateCredential.dart';
 import 'package:hotcol/Recode/grantcredential.dart';
 import 'package:hotcol/Recode/itemcreationform.dart';
@@ -13,7 +12,6 @@ import 'package:hotcol/Recode/updateTable.dart';
 import 'package:hotcol/Recode/updateWaiter.dart';
 import 'package:hotcol/Recode/updatedeleteintro.dart';
 import 'package:hotcol/Recode/waiter_And_Table.dart';
-import 'package:hotcol/main.dart';
 import 'package:hotcol/utils/apptheme.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
@@ -23,8 +21,6 @@ import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:cloudinary_public/cloudinary_public.dart';
-import 'package:upgrader/upgrader.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class AdminHome extends StatefulWidget {
   final String HotelName;
@@ -67,15 +63,16 @@ class _AdminHomeState extends State<AdminHome> {
       TextEditingController();
 
   final String grantCredentialMutation = """
-  mutation CreateCredential(\$UserName: String!, \$Password: String!, \$Role: String!, \$HotelName: String!){
-  CreateCredential(UserName: \$UserName, Password: \$Password, Role: \$Role, HotelName: \$HotelName){
-  id
-  UserName
-  HotelName
-  Password
-  Role
+mutation CreateCredential(\$UserName: String!, \$Password: String!, \$Role: String!, \$HotelName: String!, \$LogoUrl: String) {
+  CreateCredential(UserName: \$UserName, Password: \$Password, Role: \$Role, HotelName: \$HotelName, LogoUrl: \$LogoUrl) {
+    id
+    UserName
+    HotelName
+    Password
+    Role
+    LogoUrl
   }
-  }
+}
 """;
 
   final String adminUpdateCredentialMutation = """
@@ -461,102 +458,30 @@ class _AdminHomeState extends State<AdminHome> {
     }
   }
 
-  void checkForUpdate(String latestVersion) {
-    String updateUrl = Platform.isWindows ? "" : "";
-    CupertinoAlertDialog(
-      title: Text(
-        "Update Available",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      content: Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Text(
-          "A new version of the app is available. version $latestVersion, please update to continue.",
-          style: TextStyle(fontSize: 16),
-        ),
-      ),
-      actions: [
-        CupertinoDialogAction(
-          onPressed: () async {
-            Uri uri = Uri.parse(updateUrl);
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri);
-            } else {
-              _showSnackBar(
-                context,
-                "Couldn't open the Update Link",
-                Colors.red,
-              );
-            }
-          },
-          child: Text(
-            "Update Now",
-            style: TextStyle(color: CupertinoColors.activeBlue),
-          ),
-        ),
-      ],
-    );
-  }
-
-  checkForVersionUpdate() {
-    final storedVersion = upgrader.versionInfo?.appStoreVersion;
-    final installedVersion = upgrader.versionInfo?.installedVersion;
-
-    if (storedVersion != null && installedVersion != null) {
-      if (storedVersion > installedVersion) {
-        checkForUpdate(storedVersion.toString());
-      } else {
-        _showSnackBar(
-          context,
-          "You are using the latest version.",
-          Colors.green,
-        );
-      }
-    } else {
-      _showSnackBar(
-        context,
-        "Coming Soon...",
-        const Color.fromARGB(255, 110, 105, 53),
-      );
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Apptheme.loginscaffold,
       appBar: AppBar(
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(90),
+              child: Image(
+                image: Image.network(widget.Logo).image,
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+              ),
+            ),
+            SizedBox(width: 10),
             Text(
               "${widget.HotelName} Admin Panel",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 fontFamily: "NotoSerif",
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Future.delayed(Duration(seconds: 2)).then((value) {
-                  checkForVersionUpdate();
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Apptheme.buttontxt,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(90),
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(90),
-                child: Image(
-                  image: Image.network(widget.Logo).image,
-                  width: 20,
-                  height: 50,
-                  fit: BoxFit.cover,
-                ),
               ),
             ),
           ],
@@ -787,17 +712,19 @@ class _AdminHomeState extends State<AdminHome> {
                         options: MutationOptions(
                           document: gql(itemCreateMutation),
                           onCompleted: (data) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Item Created Successfully"),
-                                duration: Duration(seconds: 2),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                            setState(() {
-                              _selectedImageFile = null;
-                              foodImage = "";
-                            });
+                            if (data != null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text("Item Created Successfully"),
+                                  duration: Duration(seconds: 2),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                              setState(() {
+                                _selectedImageFile = null;
+                                foodImage = "";
+                              });
+                            }
                           },
                           onError: (error) {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -880,16 +807,20 @@ class _AdminHomeState extends State<AdminHome> {
                                 options: MutationOptions(
                                   document: gql(deleteItemMutation),
                                   onCompleted: (data) {
-                                    refetch?.call();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text(
-                                          "Item Deleted Successfully!",
+                                    if (data != null) {
+                                      refetch?.call();
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        SnackBar(
+                                          content: Text(
+                                            "Item Deleted Successfully!",
+                                          ),
+                                          duration: Duration(seconds: 2),
+                                          backgroundColor: Colors.green,
                                         ),
-                                        duration: Duration(seconds: 2),
-                                        backgroundColor: Colors.green,
-                                      ),
-                                    );
+                                      );
+                                    }
                                   },
                                   onError: (error) {
                                     ScaffoldMessenger.of(context).showSnackBar(
@@ -908,23 +839,25 @@ class _AdminHomeState extends State<AdminHome> {
                                     options: MutationOptions(
                                       document: gql(updateItemMutation),
                                       onCompleted: (data) {
-                                        refetch?.call();
-                                        Navigator.of(context).pop();
-                                        setState(() {
-                                          _selectedImageFile = null;
-                                          foodImage = "";
-                                        });
-                                        ScaffoldMessenger.of(
-                                          context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              "Item Updated Successfully!",
+                                        if (data != null) {
+                                          refetch?.call();
+                                          Navigator.of(context).pop();
+                                          setState(() {
+                                            _selectedImageFile = null;
+                                            foodImage = "";
+                                          });
+                                          ScaffoldMessenger.of(
+                                            context,
+                                          ).showSnackBar(
+                                            SnackBar(
+                                              content: Text(
+                                                "Item Updated Successfully!",
+                                              ),
+                                              duration: Duration(seconds: 2),
+                                              backgroundColor: Colors.green,
                                             ),
-                                            duration: Duration(seconds: 2),
-                                            backgroundColor: Colors.green,
-                                          ),
-                                        );
+                                          );
+                                        }
                                       },
                                       onError: (error) {
                                         Navigator.of(context).pop();
@@ -1079,20 +1012,26 @@ class _AdminHomeState extends State<AdminHome> {
                         options: MutationOptions(
                           document: gql(grantCredentialMutation),
                           onCompleted: (data) {
-                            _showSnackBar(
-                              context,
-                              "Credential Granted Successfully",
-                              Colors.green,
-                            );
-                            credUsername.clear();
-                            credPassword.clear();
-                            stakeType = "Kitchen";
+                            if (data != null) {
+                              _showSnackBar(
+                                context,
+                                "Credential Granted Successfully",
+                                Colors.green,
+                              );
+                              credUsername.clear();
+                              credPassword.clear();
+                              stakeType = "Kitchen";
+                            } else {
+                              credUsername.clear();
+                              credPassword.clear();
+                              stakeType = "Kitchen";
+                            }
                           },
                           onError: (error) {
                             String errorMessage;
                             if (error?.linkException != null) {
                               errorMessage =
-                                  "Connection Timeout or Network Error. Please check your server status (10.0.2.2:4000) and connection.";
+                                  "Connection Timeout or Network Error.${error?.linkException}";
                             } else if (error!.graphqlErrors.isNotEmpty) {
                               errorMessage =
                                   "Login failed: ${error.graphqlErrors.first.message}";
@@ -1127,6 +1066,7 @@ class _AdminHomeState extends State<AdminHome> {
                                     "Password": credPassword.text,
                                     "Role": stakeType,
                                     "HotelName": widget.HotelName,
+                                    "LogoUrl": widget.Logo,
                                   });
                                 },
                               );
@@ -1163,14 +1103,16 @@ class _AdminHomeState extends State<AdminHome> {
                                 options: MutationOptions(
                                   document: gql(adminUpdateCredentialMutation),
                                   onCompleted: (data) {
-                                    _showSnackBar(
-                                      context,
-                                      "Admin Password Updated Successfully",
-                                      Colors.green,
-                                    );
-                                    OldPasswordController.clear();
-                                    NewPasswordController.clear();
-                                    ConfirmPasswordController.clear();
+                                    if (data != null) {
+                                      _showSnackBar(
+                                        context,
+                                        "Admin Password Updated Successfully",
+                                        Colors.green,
+                                      );
+                                      OldPasswordController.clear();
+                                      NewPasswordController.clear();
+                                      ConfirmPasswordController.clear();
+                                    }
                                   },
                                   onError: (error) {
                                     _showSnackBar(
@@ -1187,14 +1129,16 @@ class _AdminHomeState extends State<AdminHome> {
                                         credUpdateCredentialMutation,
                                       ),
                                       onCompleted: (data) {
-                                        _showSnackBar(
-                                          context,
-                                          "Credential Updated Successfully",
-                                          Colors.green,
-                                        );
-                                        credUsername.clear();
-                                        credPassword.clear();
-                                        stakeType = "Kitchen";
+                                        if (data != null) {
+                                          _showSnackBar(
+                                            context,
+                                            "Credential Updated Successfully",
+                                            Colors.green,
+                                          );
+                                          credUsername.clear();
+                                          credPassword.clear();
+                                          stakeType = "Kitchen";
+                                        }
                                       },
                                       onError: (error) {
                                         _showSnackBar(
@@ -1376,18 +1320,22 @@ class _AdminHomeState extends State<AdminHome> {
                                         options: MutationOptions(
                                           document: gql(deleteWaiterMutation),
                                           onCompleted: (data) {
-                                            waiterRefetch?.call();
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              SnackBar(
-                                                content: Text(
-                                                  "Waiter Deleted Successfully!",
+                                            if (data != null) {
+                                              waiterRefetch?.call();
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    "Waiter Deleted Successfully!",
+                                                  ),
+                                                  duration: Duration(
+                                                    seconds: 2,
+                                                  ),
+                                                  backgroundColor: Colors.green,
                                                 ),
-                                                duration: Duration(seconds: 2),
-                                                backgroundColor: Colors.green,
-                                              ),
-                                            );
+                                              );
+                                            }
                                           },
                                           onError: (error) {
                                             ScaffoldMessenger.of(
@@ -1414,21 +1362,23 @@ class _AdminHomeState extends State<AdminHome> {
                                                     deleteTableMutation,
                                                   ),
                                                   onCompleted: (data) {
-                                                    tableRefetch?.call();
-                                                    ScaffoldMessenger.of(
-                                                      context,
-                                                    ).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text(
-                                                          "Table Deleted Successfully!",
+                                                    if (data != null) {
+                                                      tableRefetch?.call();
+                                                      ScaffoldMessenger.of(
+                                                        context,
+                                                      ).showSnackBar(
+                                                        SnackBar(
+                                                          content: Text(
+                                                            "Table Deleted Successfully!",
+                                                          ),
+                                                          duration: Duration(
+                                                            seconds: 2,
+                                                          ),
+                                                          backgroundColor:
+                                                              Colors.green,
                                                         ),
-                                                        duration: Duration(
-                                                          seconds: 2,
-                                                        ),
-                                                        backgroundColor:
-                                                            Colors.green,
-                                                      ),
-                                                    );
+                                                      );
+                                                    }
                                                   },
                                                   onError: (error) {
                                                     ScaffoldMessenger.of(

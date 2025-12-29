@@ -3,14 +3,17 @@
 
 #define MyAppName "HotCol"
 #define MyAppVersion "1.0"
-#define MyAppPublisher "Abdurehman"
-#define MyAppURL "https://3-d-portfolio-rpdm.vercel.app"
+#define MyAppPublisher "Apex Solution"
+#define MyAppURL "https://3-d-portfolio-rpdm.vercel.app/"
 #define MyAppExeName "hotcol.exe"
+#define MyAppAssocName MyAppName + " File"
+#define MyAppAssocExt ".exe"
+#define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{D74CC80D-9F4F-4141-8AA7-5EE355DC33CD}
+AppId={{3D51651E-ACA0-4E31-8C95-0D522B81DB61}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -28,11 +31,12 @@ ArchitecturesAllowed=x64compatible
 ; meaning it should use the native 64-bit Program Files directory and
 ; the 64-bit view of the registry.
 ArchitecturesInstallIn64BitMode=x64compatible
+ChangesAssociations=yes
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only).
 ;PrivilegesRequired=lowest
 OutputDir=C:\Users\abdur\Documents\Desktop Apps\hotcol\installers
-OutputBaseFilename=hotcol
+OutputBaseFilename=HotCol
 SetupIconFile=C:\Users\abdur\Documents\Desktop Apps\hotcol\windows\runner\resources\app_icon.ico
 SolidCompression=yes
 WizardStyle=modern
@@ -49,8 +53,15 @@ Source: "C:\Users\abdur\Documents\Desktop Apps\hotcol\build\windows\x64\runner\R
 Source: "C:\Users\abdur\Documents\Desktop Apps\hotcol\build\windows\x64\runner\Release\file_selector_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\abdur\Documents\Desktop Apps\hotcol\build\windows\x64\runner\Release\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\abdur\Documents\Desktop Apps\hotcol\build\windows\x64\runner\Release\image_compression_flutter_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\abdur\Documents\Desktop Apps\hotcol\build\windows\x64\runner\Release\url_launcher_windows_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\abdur\Documents\Desktop Apps\hotcol\build\windows\x64\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+
+[Registry]
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocExt}\OpenWithProgids"; ValueType: string; ValueName: "{#MyAppAssocKey}"; ValueData: ""; Flags: uninsdeletevalue
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}"; ValueType: string; ValueName: ""; ValueData: "{#MyAppAssocName}"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\{#MyAppExeName},0"
+Root: HKA; Subkey: "Software\Classes\{#MyAppAssocKey}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""
 
 [Icons]
 Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"

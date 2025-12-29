@@ -1,16 +1,10 @@
 // ignore_for_file: use_build_context_synchronously, non_constant_identifier_names
 
-import 'dart:io';
-
-import 'package:flutter/cupertino.dart';
 import 'package:hotcol/CashierJobs/order.dart';
 import 'package:hotcol/CashierJobs/payment.dart';
-import 'package:hotcol/main.dart';
 import 'package:hotcol/utils/apptheme.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:upgrader/upgrader.dart';
 
 class CashierHome extends StatefulWidget {
   final String HotelName;
@@ -154,66 +148,6 @@ class _CashierHomeState extends State<CashierHome> {
   }
 """;
 
-  void checkForUpdate(String latestVersion) {
-    String updateUrl = Platform.isWindows ? "" : "";
-    CupertinoAlertDialog(
-      title: Text(
-        "Update Available",
-        style: TextStyle(fontWeight: FontWeight.bold),
-      ),
-      content: Padding(
-        padding: const EdgeInsets.only(top: 8),
-        child: Text(
-          "A new version of the app is available. version $latestVersion, please update to continue.",
-          style: TextStyle(fontSize: 16),
-        ),
-      ),
-      actions: [
-        CupertinoDialogAction(
-          onPressed: () async {
-            Uri uri = Uri.parse(updateUrl);
-            if (await canLaunchUrl(uri)) {
-              await launchUrl(uri);
-            } else {
-              _showSnackBar(
-                context,
-                "Couldn't open the Update Link",
-                Colors.red,
-              );
-            }
-          },
-          child: Text(
-            "Update Now",
-            style: TextStyle(color: CupertinoColors.activeBlue),
-          ),
-        ),
-      ],
-    );
-  }
-
-  checkForVersionUpdate() {
-    final storedVersion = upgrader.versionInfo?.appStoreVersion;
-    final installedVersion = upgrader.versionInfo?.installedVersion;
-
-    if (storedVersion != null && installedVersion != null) {
-      if (storedVersion > installedVersion) {
-        checkForUpdate(storedVersion.toString());
-      } else {
-        _showSnackBar(
-          context,
-          "You are using the latest version.",
-          Colors.green,
-        );
-      }
-    } else {
-      _showSnackBar(
-        context,
-        "Coming Soon...",
-        const Color.fromARGB(255, 110, 105, 53),
-      );
-    }
-  }
-
   void _updateWaiterPayment({
     required RunMutation waiterMutation,
     required String waiterName,
@@ -275,17 +209,6 @@ class _CashierHomeState extends State<CashierHome> {
             "HotelName": HotelName,
           });
         });
-  }
-
-  void _showSnackBar(BuildContext context, String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: Duration(seconds: 2),
-        backgroundColor: color,
-      ),
-    );
-    // ScaffoldMessenger.of(context).hideCurrentSnackBar();
   }
 
   void _updateTablePayment({
@@ -595,8 +518,18 @@ class _CashierHomeState extends State<CashierHome> {
       backgroundColor: Apptheme.loginscaffold,
       appBar: AppBar(
         title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(90),
+              child: Image(
+                image: Image.network(widget.Logo).image,
+                width: 50,
+                height: 50,
+                fit: BoxFit.cover,
+              ),
+            ),
+            SizedBox(width: 10),
             Text(
               "${widget.HotelName} Cashier Panel",
               style: TextStyle(
@@ -605,213 +538,213 @@ class _CashierHomeState extends State<CashierHome> {
                 fontFamily: "NotoSerif",
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                Future.delayed(Duration(seconds: 2)).then((value) {
-                  checkForVersionUpdate();
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Apptheme.buttontxt,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(90),
-                ),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(90),
-                child: Image(
-                  image: Image.network(widget.Logo).image,
-                  width: 20,
-                  height: 50,
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
           ],
         ),
         centerTitle: true,
       ),
-      body: Center(
-        child: order
-            ? Query(
-                options: QueryOptions(document: gql(getItemsQuery)),
-                builder:
-                    (
-                      QueryResult result, {
-                      VoidCallback? refetch,
-                      FetchMore? fetchMore,
-                    }) {
-                      if (result.isLoading) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      if (result.hasException) {
-                        return Text("Error: ${result.exception.toString()}");
-                      }
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return Center(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: 1200,
+                maxHeight: constraints.maxHeight,
+              ),
+              child: order
+                  ? Query(
+                      options: QueryOptions(document: gql(getItemsQuery)),
+                      builder:
+                          (
+                            QueryResult result, {
+                            VoidCallback? refetch,
+                            FetchMore? fetchMore,
+                          }) {
+                            if (result.isLoading) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
+                            if (result.hasException) {
+                              return Text(
+                                "Error: ${result.exception.toString()}",
+                              );
+                            }
 
-                      final items =
-                          (result.data?['items'] as List<dynamic>?) ?? [];
+                            final items =
+                                (result.data?['items'] as List<dynamic>?) ?? [];
 
-                      return Mutation(
-                        options: MutationOptions(
-                          document: gql(orderCreationMutation),
-                          onCompleted: (data) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text("Order Sent Successfully"),
-                                duration: Duration(seconds: 2),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                          },
-                          onError: (error) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  "Something went Wrong. Please Try Again",
-                                ),
-                                duration: Duration(seconds: 2),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          },
-                        ),
-                        builder:
-                            (
-                              RunMutation runMutation,
-                              QueryResult? mutationResult,
-                            ) {
-                              return Order(
-                                handleChange: () =>
-                                    setState(() => order = false),
-                                items: items,
-                                HotelName: widget.HotelName,
-                                onItemSelected: (item) {
-                                  _showOrderDetailsDialog(
-                                    context,
-                                    item,
-                                    runMutation,
+                            return Mutation(
+                              options: MutationOptions(
+                                document: gql(orderCreationMutation),
+                                onCompleted: (data) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text("Order Sent Successfully"),
+                                      duration: Duration(seconds: 2),
+                                      backgroundColor: Colors.green,
+                                    ),
                                   );
                                 },
-                              );
-                            },
-                      );
-                    },
-              )
-            : Query(
-                options: QueryOptions(document: gql(getOrdersQuery)),
-                builder:
-                    (
-                      QueryResult result, {
-                      VoidCallback? refetch,
-                      FetchMore? fetchMore,
-                    }) {
-                      if (result.isLoading) {
-                        return Center(child: CircularProgressIndicator());
-                      } else if (result.hasException) {
-                        return Center(child: Text("Error Happened"));
-                      }
-
-                      final items =
-                          (result.data?['orders'] as List<dynamic>?) ?? [];
-
-                      return Mutation(
-                        options: MutationOptions(
-                          document: gql(payUpdateMutation),
-                          onCompleted: (data) {
-                            refetch?.call();
-                          },
-                          onError: (error) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  "Something Went Wrong. Please Try Again",
-                                ),
-                                duration: Duration(seconds: 2),
-                                backgroundColor: Colors.red,
+                                onError: (error) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Something went Wrong. Please Try Again",
+                                      ),
+                                      duration: Duration(seconds: 2),
+                                      backgroundColor: Colors.red,
+                                    ),
+                                  );
+                                },
                               ),
-                            );
-                          },
-                        ),
-                        builder: (RunMutation runMutation, QueryResult? result) {
-                          return Mutation(
-                            options: MutationOptions(
-                              document: gql(paymentWaiterUpdate),
-                              onCompleted: (data) {},
-                              onError: (error) {},
-                            ),
-                            builder:
-                                (
-                                  RunMutation waiterMutation,
-                                  QueryResult? waiterResult,
-                                ) {
-                                  return Mutation(
-                                    options: MutationOptions(
-                                      document: gql(paymentUpdateTable),
-                                      onCompleted: (data) {
-                                        ScaffoldMessenger.of(
+                              builder:
+                                  (
+                                    RunMutation runMutation,
+                                    QueryResult? mutationResult,
+                                  ) {
+                                    return Order(
+                                      handleChange: () =>
+                                          setState(() => order = false),
+                                      items: items,
+                                      HotelName: widget.HotelName,
+                                      onItemSelected: (item) {
+                                        _showOrderDetailsDialog(
                                           context,
-                                        ).showSnackBar(
-                                          SnackBar(
-                                            content: Text(
-                                              "Everything is Updated Successfully",
-                                            ),
-                                            duration: Duration(seconds: 3),
-                                            backgroundColor: Colors.green,
-                                          ),
+                                          item,
+                                          runMutation,
                                         );
                                       },
-                                      onError: (error) {},
+                                    );
+                                  },
+                            );
+                          },
+                    )
+                  : Query(
+                      options: QueryOptions(document: gql(getOrdersQuery)),
+                      builder:
+                          (
+                            QueryResult result, {
+                            VoidCallback? refetch,
+                            FetchMore? fetchMore,
+                          }) {
+                            if (result.isLoading) {
+                              return Center(child: CircularProgressIndicator());
+                            } else if (result.hasException) {
+                              return Center(child: Text("Error Happened"));
+                            }
+
+                            final items =
+                                (result.data?['orders'] as List<dynamic>?) ??
+                                [];
+
+                            return Mutation(
+                              options: MutationOptions(
+                                document: gql(payUpdateMutation),
+                                onCompleted: (data) {
+                                  refetch?.call();
+                                },
+                                onError: (error) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                        "Something Went Wrong. Please Try Again",
+                                      ),
+                                      duration: Duration(seconds: 2),
+                                      backgroundColor: Colors.red,
                                     ),
-                                    builder:
-                                        (
-                                          RunMutation tableMutation,
-                                          QueryResult? tableResult,
-                                        ) {
-                                          return Payment(
-                                            handleChange: () {
-                                              setState(() {
-                                                order = true;
-                                              });
-                                            },
-                                            items: items,
-                                            HotelName: widget.HotelName,
-                                            handlePayment:
-                                                (
-                                                  int id,
-                                                  Map<String, dynamic> item,
-                                                  double sales,
-                                                ) {
-                                                  runMutation({
-                                                    "id": id,
-                                                    "payment": "Paid",
-                                                  });
-                                                  _updateWaiterPayment(
-                                                    waiterMutation:
-                                                        waiterMutation,
-                                                    waiterName:
-                                                        item['waiterName']
-                                                            .toString(),
-                                                    tableNo: item['tableNo'],
-                                                    sales: sales,
-                                                    HotelName: widget.HotelName,
-                                                  );
-                                                  _updateTablePayment(
-                                                    tableMutation:
-                                                        tableMutation,
-                                                    tableNo: item['tableNo'],
-                                                    sales: sales,
-                                                    HotelName: widget.HotelName,
-                                                  );
-                                                },
-                                          );
-                                        },
                                   );
                                 },
-                          );
-                        },
-                      );
-                    },
-              ),
+                              ),
+                              builder: (RunMutation runMutation, QueryResult? result) {
+                                return Mutation(
+                                  options: MutationOptions(
+                                    document: gql(paymentWaiterUpdate),
+                                    onCompleted: (data) {},
+                                    onError: (error) {},
+                                  ),
+                                  builder:
+                                      (
+                                        RunMutation waiterMutation,
+                                        QueryResult? waiterResult,
+                                      ) {
+                                        return Mutation(
+                                          options: MutationOptions(
+                                            document: gql(paymentUpdateTable),
+                                            onCompleted: (data) {
+                                              ScaffoldMessenger.of(
+                                                context,
+                                              ).showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    "Everything is Updated Successfully",
+                                                  ),
+                                                  duration: Duration(
+                                                    seconds: 3,
+                                                  ),
+                                                  backgroundColor: Colors.green,
+                                                ),
+                                              );
+                                            },
+                                            onError: (error) {},
+                                          ),
+                                          builder:
+                                              (
+                                                RunMutation tableMutation,
+                                                QueryResult? tableResult,
+                                              ) {
+                                                return Payment(
+                                                  handleChange: () {
+                                                    setState(() {
+                                                      order = true;
+                                                    });
+                                                  },
+                                                  items: items,
+                                                  HotelName: widget.HotelName,
+                                                  handlePayment:
+                                                      (
+                                                        int id,
+                                                        Map<String, dynamic>
+                                                        item,
+                                                        double sales,
+                                                      ) {
+                                                        runMutation({
+                                                          "id": id,
+                                                          "payment": "Paid",
+                                                        });
+                                                        _updateWaiterPayment(
+                                                          waiterMutation:
+                                                              waiterMutation,
+                                                          waiterName:
+                                                              item['waiterName']
+                                                                  .toString(),
+                                                          tableNo:
+                                                              item['tableNo'],
+                                                          sales: sales,
+                                                          HotelName:
+                                                              widget.HotelName,
+                                                        );
+                                                        _updateTablePayment(
+                                                          tableMutation:
+                                                              tableMutation,
+                                                          tableNo:
+                                                              item['tableNo'],
+                                                          sales: sales,
+                                                          HotelName:
+                                                              widget.HotelName,
+                                                        );
+                                                      },
+                                                );
+                                              },
+                                        );
+                                      },
+                                );
+                              },
+                            );
+                          },
+                    ),
+            ),
+          );
+        },
       ),
     );
   }

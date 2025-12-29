@@ -84,52 +84,78 @@ class _LoginState extends State<Login> {
                       final user = resultData['Login']['user'];
                       final Role = user['Role'];
                       final HotelName = user['HotelName'];
-                      final Logo = user['LogoUrl'];
+                      final Logo = user['LogoUrl'] ?? '';
 
                       await _storeToken(token, Role, HotelName);
 
-                      if (Role == 'Admin') {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => AdminHome(HotelName: HotelName, Logo: Logo),
-                          ),
-                        );
-                      } else if (Role == 'Kitchen') {
-                        Navigator.push(context,
-                          MaterialPageRoute(builder: (context) => Chef(HotelName: HotelName, Logo: Logo)),
-                        );
-                      } else if (Role == 'Cashier') {
-                        Navigator.push(context,
-                          MaterialPageRoute(
-                            builder: (context) => CashierHome(HotelName: HotelName, Logo: Logo),
-                          ),
-                        );
-                      } else if (Role == 'Barista') {
-                        Navigator.push(context,
-                          MaterialPageRoute(
-                            builder: (context) =>  Barista(HotelName: HotelName, Logo: Logo),
-                          ),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text("Role not recognized")),
-                        );
-                      }
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        try {
+                          if (Role == 'Admin') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    AdminHome(HotelName: HotelName, Logo: Logo),
+                              ),
+                            );
+                          } else if (Role == 'Kitchen') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    Chef(HotelName: HotelName, Logo: Logo),
+                              ),
+                            );
+                          } else if (Role == 'Cashier') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CashierHome(
+                                  HotelName: HotelName,
+                                  Logo: Logo,
+                                ),
+                              ),
+                            );
+                          } else if (Role == 'Barista') {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    Barista(HotelName: HotelName, Logo: Logo),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text("Role not recognized"),
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text("Navigation error: $e")),
+                          );
+                        }
+                      });
                     }
                   },
                   onError: (error) {
                     String errorMessage;
-                    
+
                     if (error?.linkException != null) {
                       // This error type covers network issues, including timeouts
-                      errorMessage = "Connection Timeout or Network Error. Please try again.";
+                      errorMessage =
+                          "Connection Timeout or Network Error. Please try again.";
                     } else if (error!.graphqlErrors.isNotEmpty) {
-                      if (error.graphqlErrors.first.message.contains("User.Password") && Password.isNotEmpty) {
+                      if (error.graphqlErrors.first.message.contains(
+                            "User.Password",
+                          ) &&
+                          Password.isNotEmpty) {
                         return;
                       }
                       // Standard GraphQL validation or server errors
-                      errorMessage = "Login failed: ${error.graphqlErrors.first.message}";
+                      errorMessage =
+                          "Login failed: ${error.graphqlErrors.first.message}";
                     } else {
                       // Any other unexpected errors
                       errorMessage = "Login failed due to an unknown error.";
