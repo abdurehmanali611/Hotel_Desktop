@@ -60,7 +60,7 @@ class _BaristaState extends State<Barista> {
             ),
             SizedBox(width: 10),
             Text(
-              "${widget.HotelName} Barista Panel",
+              "${widget.HotelName} Barista",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,

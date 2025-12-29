@@ -60,7 +60,7 @@ class _ChefState extends State<Chef> {
             ),
             SizedBox(width: 10),
             Text(
-              "${widget.HotelName} Chef Panel",
+              "${widget.HotelName} Chef",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
