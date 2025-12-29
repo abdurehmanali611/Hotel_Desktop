@@ -3,7 +3,7 @@
 
 #define MyAppName "HotCol"
 #define MyAppVersion "1.0"
-#define MyAppPublisher "Apex Solution"
+#define MyAppPublisher "Apex Solutions"
 #define MyAppURL "https://3-d-portfolio-rpdm.vercel.app/"
 #define MyAppExeName "hotcol.exe"
 #define MyAppAssocName MyAppName + " File"
@@ -13,7 +13,7 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{3D51651E-ACA0-4E31-8C95-0D522B81DB61}
+AppId={{98D405C7-0E62-4AB7-8381-6170F94881A4}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
