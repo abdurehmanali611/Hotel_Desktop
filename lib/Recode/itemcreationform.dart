@@ -12,6 +12,7 @@ class ItemCreationForm extends StatelessWidget {
   final VoidCallback handleCreation;
   final String action;
   final File? imageFood;
+  final String? imageUrl;
   final String catValue;
   final String foodCat;
   final String drinkCat;
@@ -26,6 +27,7 @@ class ItemCreationForm extends StatelessWidget {
     required this.catValue,
     required this.fileUpload,
     this.imageFood,
+    this.imageUrl,
     required this.handleCreation,
     required this.action,
     required this.isUploading,
@@ -44,6 +46,8 @@ class ItemCreationForm extends StatelessWidget {
             catSelect: catSelect,
             catValue: catValue,
             fileUpload: fileUpload,
+            imageFood: imageFood,
+            imageUrl: imageUrl,
             handleCreation: handleCreation,
             action: action,
             isUploading: isUploading,
@@ -57,6 +61,8 @@ class ItemCreationForm extends StatelessWidget {
             catSelect: catSelect,
             catValue: catValue,
             fileUpload: fileUpload,
+            imageFood: imageFood,
+            imageUrl: imageUrl,
             handleCreation: handleCreation,
             action: action,
             isUploading: isUploading,

@@ -149,11 +149,11 @@ class _ChefState extends State<Chef> {
                     itemBuilder: (context, index) {
                       final item = filteredItems.elementAt(index);
                       return Container(
-                        width: 250,
+                        width: 150,
                         height: 440,
                         padding: const EdgeInsets.all(25),
                         margin: const EdgeInsets.symmetric(
-                          horizontal: 80,
+                          horizontal: 370,
                           vertical: 40,
                         ),
                         decoration: BoxDecoration(
@@ -218,6 +218,7 @@ class _ChefState extends State<Chef> {
                             ),
                             const SizedBox(height: 25),
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 ElevatedButton(
                                   onPressed: () {
@@ -227,12 +228,7 @@ class _ChefState extends State<Chef> {
                                     });
                                   },
                                   style: ElevatedButton.styleFrom(
-                                    backgroundColor: const Color.fromARGB(
-                                      255,
-                                      116,
-                                      44,
-                                      44,
-                                    ),
+                                    backgroundColor: const Color.fromARGB(255, 218, 70, 70),
                                     foregroundColor: Apptheme.buttontxt,
                                     padding: const EdgeInsets.symmetric(
                                       horizontal: 40,

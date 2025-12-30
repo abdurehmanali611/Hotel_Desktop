@@ -12,6 +12,7 @@ class Desktopresponsive extends StatelessWidget {
   final VoidCallback handleCreation;
   final String action;
   final File? imageFood;
+  final String? imageUrl;
   final String catValue;
   final String foodCat;
   final String drinkCat;
@@ -26,6 +27,7 @@ class Desktopresponsive extends StatelessWidget {
     required this.catValue,
     required this.fileUpload,
     this.imageFood,
+    this.imageUrl,
     required this.handleCreation,
     required this.action,
     required this.isUploading,
@@ -233,6 +235,42 @@ class Desktopresponsive extends StatelessWidget {
                                     width: 200,
                                     height: 200,
                                     fit: BoxFit.cover,
+                                  ),
+                                )
+                              : (imageUrl != null && imageUrl!.isNotEmpty)
+                              ? ClipRRect(
+                                  borderRadius: BorderRadius.circular(18),
+                                  child: Image.network(
+                                    imageUrl!,
+                                    width: 200,
+                                    height: 200,
+                                    fit: BoxFit.cover,
+                                    loadingBuilder: (context, child, progress) {
+                                      if (progress == null) return child;
+                                      return const Center(
+                                        child: CircularProgressIndicator(),
+                                      );
+                                    },
+                                    errorBuilder: (context, error, stack) =>
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            Icon(
+                                              Icons.add_photo_alternate_rounded,
+                                              size: 80,
+                                              color: Colors.grey.shade500,
+                                            ),
+                                            const SizedBox(height: 8),
+                                            const Text(
+                                              "Tap to upload",
+                                              style: TextStyle(
+                                                color: Color(0xFF666666),
+                                                fontSize: 16,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                   ),
                                 )
                               : Column(

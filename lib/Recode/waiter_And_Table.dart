@@ -86,54 +86,78 @@ class WaiterAndTable extends StatelessWidget {
               : selected.toLowerCase() == "waiter"
               ? Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Expanded(
-                          flex: 3,
-                          child: Text("Waiter Name", style: headerStyle),
-                        ),
-                        const Expanded(
-                          flex: 1,
-                          child: Center(child: Text("Sex", style: headerStyle)),
-                        ),
-                        const Expanded(
-                          flex: 1,
-                          child: Center(child: Text("Age", style: headerStyle)),
-                        ),
-                        const Expanded(
-                          flex: 2,
-                          child: Center(child: Text("Exp", style: headerStyle)),
-                        ),
-                        const Expanded(
-                          flex: 2,
-                          child: Center(
-                            child: Text("Phone No.", style: headerStyle),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 14,
+                      ),
+                      margin: const EdgeInsets.symmetric(horizontal: 0),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.08),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
                           ),
-                        ),
-                        const Expanded(
-                          flex: 2,
-                          child: Center(
-                            child: Text("Orders", style: headerStyle),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: const [
+                          Expanded(
+                            flex: 3,
+                            child: Text("Waiter Name", style: headerStyle),
                           ),
-                        ),
-                        const Expanded(
-                          flex: 2,
-                          child: Text(
-                            "Sales Amount",
-                            style: headerStyle,
-                            textAlign: TextAlign.end,
+                          Expanded(
+                            flex: 1,
+                            child: Center(
+                              child: Text("Sex", style: headerStyle),
+                            ),
                           ),
-                        ),
-                        const Expanded(
-                          flex: 2,
-                          child: Text(
-                            "Actions",
-                            style: headerStyle,
-                            textAlign: TextAlign.end,
+                          Expanded(
+                            flex: 1,
+                            child: Center(
+                              child: Text("Age", style: headerStyle),
+                            ),
                           ),
-                        ),
-                      ],
+                          Expanded(
+                            flex: 2,
+                            child: Center(
+                              child: Text("Exp", style: headerStyle),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Center(
+                              child: Text("Phone No.", style: headerStyle),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Center(
+                              child: Text("Orders", style: headerStyle),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              "Sales Amount",
+                              style: headerStyle,
+                              textAlign: TextAlign.end,
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              "Actions",
+                              style: headerStyle,
+                              textAlign: TextAlign.end,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 30),
                     if (filteredWaiterList.isEmpty)
@@ -155,120 +179,152 @@ class WaiterAndTable extends StatelessWidget {
                         itemCount: filteredWaiterList.length,
                         itemBuilder: (context, index) {
                           final item = filteredWaiterList.elementAt(index);
-                          List<dynamic> prices =
-                              (item['price'] as List?)?.cast<double>() ?? [];
+                          List<dynamic> prices = (item['price'] as List?) ?? [];
                           List<dynamic> tables =
                               (item['tablesServed'] as List?)?.cast<int>() ??
                               [];
 
-                          final totalSales = prices.fold(
-                            0.0,
-                            (sum, price) => sum + price,
-                          );
+                          final totalSales = prices.fold<double>(0.0, (
+                            sum,
+                            price,
+                          ) {
+                            if (price == null) return sum;
+                            if (price is num) return sum + price.toDouble();
+                            final parsed = double.tryParse(price.toString());
+                            return sum + (parsed ?? 0.0);
+                          });
                           final completedOrders = tables.length;
 
-                          return Column(
-                            children: [
-                              Card(
-                                elevation: 2,
-                                margin: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                  horizontal: 0,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 15,
-                                    horizontal: 10,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        flex: 2,
-                                        child: Text(
-                                          item['name'],
-                                          style: itemStyle,
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: Center(
-                                          child: Text(
-                                            item['sex'],
-                                            style: itemStyle,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: Center(
-                                          child: Text(
-                                            "${item['age']}",
-                                            style: itemStyle,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 2,
-                                        child: Center(
-                                          child: Text(
-                                            "${item['experience']}",
-                                            style: itemStyle,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: Center(
-                                          child: Text(
-                                            item['phoneNumber'],
-                                            style: itemStyle,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 2,
-                                        child: Center(
-                                          child: Text(
-                                            "$completedOrders",
-                                            style: itemStyle,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 2,
-                                        child: Text(
-                                          totalSales.toStringAsFixed(2),
-                                          style: itemStyle.copyWith(
-                                            color: Colors.green,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          textAlign: TextAlign.end,
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: Row(
-                                          children: [
-                                            IconButton(
-                                              onPressed: () =>
-                                                  handleUpdateWaiter(item),
-                                              icon: Icon(Icons.edit),
-                                            ),
-                                            IconButton(
-                                              onPressed: () =>
-                                                  handleDeleteWaiter(item),
-                                              icon: Icon(Icons.delete),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                          return Card(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            margin: const EdgeInsets.symmetric(vertical: 10),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 12,
                               ),
-                            ],
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 20,
+                                          backgroundColor: Colors.grey.shade200,
+                                          child: Text(
+                                            (item['name'] != null &&
+                                                    item['name']
+                                                        .toString()
+                                                        .isNotEmpty)
+                                                ? item['name']
+                                                      .toString()[0]
+                                                      .toUpperCase()
+                                                : '?',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black87,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Text(
+                                            item['name'] ?? '',
+                                            style: itemStyle,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Center(
+                                      child: Text(
+                                        item['sex'] ?? '',
+                                        style: itemStyle,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Center(
+                                      child: Text(
+                                        "${item['age']}",
+                                        style: itemStyle,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Center(
+                                      child: Text(
+                                        "${item['experience']}",
+                                        style: itemStyle,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Center(
+                                      child: Text(
+                                        item['phoneNumber'] ?? '',
+                                        style: itemStyle,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Center(
+                                      child: Text(
+                                        "$completedOrders",
+                                        style: itemStyle,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 2,
+                                    child: Text(
+                                      totalSales.toStringAsFixed(2),
+                                      style: itemStyle.copyWith(
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.end,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        IconButton(
+                                          tooltip: 'Edit waiter',
+                                          onPressed: () =>
+                                              handleUpdateWaiter(item),
+                                          icon: const Icon(
+                                            Icons.edit,
+                                            size: 20,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          tooltip: 'Delete waiter',
+                                          onPressed: () =>
+                                              handleDeleteWaiter(item),
+                                          icon: const Icon(
+                                            Icons.delete,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           );
                         },
                       ),
@@ -291,42 +347,62 @@ class WaiterAndTable extends StatelessWidget {
                 )
               : Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Expanded(
-                          flex: 2,
-                          child: Text("Table Number", style: headerStyle),
-                        ),
-                        const Expanded(
-                          flex: 3,
-                          child: Center(
-                            child: Text("Capacity", style: headerStyle),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.grey.withOpacity(0.08),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
                           ),
-                        ),
-                        const Expanded(
-                          flex: 3,
-                          child: Center(
-                            child: Text("Completed Orders", style: headerStyle),
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: const [
+                          Expanded(
+                            flex: 2,
+                            child: Text("Table Number", style: headerStyle),
                           ),
-                        ),
-                        const Expanded(
-                          flex: 3,
-                          child: Text(
-                            "Sales Generated",
-                            style: headerStyle,
-                            textAlign: TextAlign.end,
+                          Expanded(
+                            flex: 3,
+                            child: Center(
+                              child: Text("Capacity", style: headerStyle),
+                            ),
                           ),
-                        ),
-                        const Expanded(
-                          flex: 1,
-                          child: Text(
-                            "Actions",
-                            style: headerStyle,
-                            textAlign: TextAlign.end,
+                          Expanded(
+                            flex: 3,
+                            child: Center(
+                              child: Text(
+                                "Completed Orders",
+                                style: headerStyle,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
+                          Expanded(
+                            flex: 3,
+                            child: Text(
+                              "Sales Generated",
+                              style: headerStyle,
+                              textAlign: TextAlign.end,
+                            ),
+                          ),
+                          Expanded(
+                            flex: 1,
+                            child: Text(
+                              "Actions",
+                              style: headerStyle,
+                              textAlign: TextAlign.end,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     const SizedBox(height: 30),
                     if (filteredTableList.isEmpty)
@@ -348,93 +424,114 @@ class WaiterAndTable extends StatelessWidget {
                         itemCount: filteredTableList.length,
                         itemBuilder: (context, index) {
                           final item = filteredTableList.elementAt(index);
-                          List<dynamic> prices =
-                              (item['price'] as List?)?.cast<double>() ?? [];
+                          List<dynamic> prices = (item['price'] as List?) ?? [];
                           List<dynamic> payments =
                               (item['payment'] as List?)?.cast<String>() ?? [];
 
-                          final totalSales = prices.fold(
-                            0.0,
-                            (sum, price) => sum + price,
-                          );
+                          final totalSales = prices.fold<double>(0.0, (
+                            sum,
+                            price,
+                          ) {
+                            if (price == null) return sum;
+                            if (price is num) return sum + price.toDouble();
+                            final parsed = double.tryParse(price.toString());
+                            return sum + (parsed ?? 0.0);
+                          });
                           final completedOrders = payments
                               .where((p) => p == "Paid")
                               .length;
-                          return Column(
-                            children: [
-                              Card(
-                                elevation: 2,
-                                margin: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                  horizontal: 0,
-                                ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 15,
-                                    horizontal: 10,
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        flex: 2,
-                                        child: Text(
+                          return Card(
+                            elevation: 3,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            margin: const EdgeInsets.symmetric(vertical: 10),
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                                horizontal: 12,
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 2,
+                                    child: Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 18,
+                                          backgroundColor: Colors.grey.shade100,
+                                          child: const Icon(
+                                            Icons.table_chart,
+                                            color: Colors.black54,
+                                            size: 18,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 12),
+                                        Text(
                                           "${item['tableNo']}",
                                           style: itemStyle,
                                         ),
-                                      ),
-                                      Expanded(
-                                        flex: 3,
-                                        child: Center(
-                                          child: Text(
-                                            "${item['capacity']}",
-                                            style: itemStyle,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 3,
-                                        child: Center(
-                                          child: Text(
-                                            "$completedOrders",
-                                            style: itemStyle,
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 3,
-                                        child: Text(
-                                          totalSales.toStringAsFixed(2),
-                                          style: itemStyle.copyWith(
-                                            color: Colors.green,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          textAlign: TextAlign.end,
-                                        ),
-                                      ),
-                                      Expanded(
-                                        flex: 1,
-                                        child: Row(
-                                          children: [
-                                            IconButton(
-                                              onPressed: () =>
-                                                  handleTableUpdate(item),
-                                              icon: Icon(Icons.edit),
-                                            ),
-                                            IconButton(
-                                              onPressed: () =>
-                                                  handleDeleteTable(item),
-                                              icon: Icon(Icons.delete),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Center(
+                                      child: Text(
+                                        "${item['capacity']}",
+                                        style: itemStyle,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Center(
+                                      child: Text(
+                                        "$completedOrders",
+                                        style: itemStyle,
+                                      ),
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 3,
+                                    child: Text(
+                                      totalSales.toStringAsFixed(2),
+                                      style: itemStyle.copyWith(
+                                        color: Colors.green,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                      textAlign: TextAlign.end,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    flex: 1,
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        IconButton(
+                                          tooltip: 'Edit table',
+                                          onPressed: () =>
+                                              handleTableUpdate(item),
+                                          icon: const Icon(
+                                            Icons.edit,
+                                            size: 20,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          tooltip: 'Delete table',
+                                          onPressed: () =>
+                                              handleDeleteTable(item),
+                                          icon: const Icon(
+                                            Icons.delete,
+                                            size: 20,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ],
+                            ),
                           );
                         },
                       ),

@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:image_compression_flutter/flutter_image_compress.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 import 'package:month_picker_dialog/month_picker_dialog.dart';
 import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
@@ -33,7 +34,7 @@ class AdminHome extends StatefulWidget {
 
 class _AdminHomeState extends State<AdminHome> {
   String dropdownvalue = "Daily Report";
-  DateTime calenderValue = DateTime(2025, 10, 30);
+  DateTime calenderValue = DateTime.now();
   String itemName = "";
   double itemPrice = 100.0;
   String itemCat = "Food";
@@ -324,7 +325,7 @@ mutation CreateCredential(\$UserName: String!, \$Password: String!, \$Role: Stri
         final fileupload = compressedFile ?? file;
         final cloudinary = CloudinaryPublic(
           'dpyads5wb',
-          'Item_Images',
+          'Hotel_Item',
           cache: true,
         );
         final CloudinaryResponse response = await cloudinary.uploadFile(
@@ -376,6 +377,16 @@ mutation CreateCredential(\$UserName: String!, \$Password: String!, \$Role: Stri
           ]
         : sheetName == "Tables"
         ? ['Table No', 'Capacity', 'Total Sales', 'Completed Orders']
+        : sheetName == "Daily Report"
+        ? [
+            'Food Name',
+            'Category',
+            'Price',
+            'Order Amount',
+            'Waiter Name',
+            'Table No',
+            'Daily Sales',
+          ]
         : [
             'Food Name',
             'Category',
@@ -384,6 +395,7 @@ mutation CreateCredential(\$UserName: String!, \$Password: String!, \$Role: Stri
             'Waiter Name',
             'Table No',
             'Daily Sales',
+            'Sales Date',
           ];
 
     sheetObject.insertRowIterables(
@@ -395,11 +407,15 @@ mutation CreateCredential(\$UserName: String!, \$Password: String!, \$Role: Stri
       List<CellValue> row = [];
       final item = dataList[i];
       if (sheetName == "Waiters") {
-        List<dynamic> prices = (item['price'] as List?)?.cast<double>() ?? [];
-        List<dynamic> tables =
-            (item['tablesServed'] as List?)?.cast<int>() ?? [];
+        List<dynamic> prices = (item['price'] as List?) ?? [];
+        List<dynamic> tables = (item['tablesServed'] as List?) ?? [];
 
-        final totalSales = prices.fold(0.0, (sum, price) => sum + price);
+        final totalSales = prices.fold<double>(0.0, (sum, price) {
+          if (price == null) return sum;
+          if (price is num) return sum + price.toDouble();
+          final parsed = double.tryParse(price.toString());
+          return sum + (parsed ?? 0.0);
+        });
         final completedOrders = tables.length;
 
         row.addAll([
@@ -412,11 +428,15 @@ mutation CreateCredential(\$UserName: String!, \$Password: String!, \$Role: Stri
           DoubleCellValue(totalSales),
         ]);
       } else if (sheetName == "Tables") {
-        List<dynamic> prices = (item['price'] as List?)?.cast<double>() ?? [];
-        List<dynamic> payments =
-            (item['payment'] as List?)?.cast<String>() ?? [];
+        List<dynamic> prices = (item['price'] as List?) ?? [];
+        List<dynamic> payments = (item['payment'] as List?) ?? [];
 
-        final totalSales = prices.fold(0.0, (sum, price) => sum + price);
+        final totalSales = prices.fold<double>(0.0, (sum, price) {
+          if (price == null) return sum;
+          if (price is num) return sum + price.toDouble();
+          final parsed = double.tryParse(price.toString());
+          return sum + (parsed ?? 0.0);
+        });
         final completedOrders = payments.where((p) => p == "Paid").length;
         row.addAll([
           IntCellValue(item['tableNo']),
@@ -424,15 +444,38 @@ mutation CreateCredential(\$UserName: String!, \$Password: String!, \$Role: Stri
           DoubleCellValue(totalSales),
           IntCellValue(completedOrders),
         ]);
-      } else {
+      } else if (sheetName == "Daily Report") {
         row.addAll([
           TextCellValue(item['title'] ?? ''),
           TextCellValue(item['category'] ?? ''),
-          DoubleCellValue(item['price']),
+          DoubleCellValue(item['price']?.toDouble() ?? 0.0),
           IntCellValue(item['orderAmount']),
           TextCellValue(item['waiterName'] ?? ''),
           IntCellValue(item['tableNo']),
-          DoubleCellValue(item['price'] * item['orderAmount']),
+          DoubleCellValue(
+            (item['price'] * item['orderAmount'])?.toDouble() ?? 0.0,
+          ),
+        ]);
+      } else {
+        final dateFmt = DateFormat('yyyy-MM-dd');
+        row.addAll([
+          TextCellValue(item['title'] ?? ''),
+          TextCellValue(item['category'] ?? ''),
+          DoubleCellValue(item['price']?.toDouble() ?? 0.0),
+          IntCellValue(item['orderAmount']),
+          TextCellValue(item['waiterName'] ?? ''),
+          IntCellValue(item['tableNo']),
+          DoubleCellValue(
+            (item['price'] * item['orderAmount'])?.toDouble() ?? 0.0,
+          ),
+          TextCellValue(
+            dateFmt.format(
+              DateTime.fromMillisecondsSinceEpoch(
+                int.tryParse(item['createdAt']?.toString() ?? '') ??
+                    DateTime.now().millisecondsSinceEpoch,
+              ),
+            ),
+          ),
         ]);
       }
       sheetObject.insertRowIterables(row, i + 1);
@@ -749,6 +792,7 @@ mutation CreateCredential(\$UserName: String!, \$Password: String!, \$Role: Stri
                                     });
                                   },
                                   imageFood: _selectedImageFile,
+                                  imageUrl: foodImage,
                                   priceChanged: (value) {
                                     setState(() {
                                       itemPrice = value;

@@ -179,7 +179,7 @@ class Payment extends StatelessWidget {
                             ),
                             const SizedBox(height: 15),
                             ElevatedButton(
-                              onPressed: () {
+                              onPressed: item['status'] != "Completed" ? null : () {
                                 handlePayment(
                                   item['id'],
                                   item,

@@ -151,7 +151,7 @@ class _BaristaState extends State<Barista> {
                             height: 440,
                             padding: const EdgeInsets.all(25),
                             margin: const EdgeInsets.symmetric(
-                              horizontal: 80,
+                              horizontal: 370,
                               vertical: 40,
                             ),
                             decoration: BoxDecoration(
@@ -219,6 +219,7 @@ class _BaristaState extends State<Barista> {
                                 ),
                                 const SizedBox(height: 25),
                                 Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: [
                                     ElevatedButton(
                                       onPressed: () {
