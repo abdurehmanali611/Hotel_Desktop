@@ -520,7 +520,7 @@ mutation CreateCredential(\$UserName: String!, \$Password: String!, \$Role: Stri
             ),
             SizedBox(width: 10),
             Text(
-              "${widget.HotelName} Admin Panel",
+              "${widget.HotelName} Admin",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,

@@ -91,19 +91,11 @@ class WaiterAndTable extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 20),
-              if (isNarrow) ...[
-                selected.isEmpty
-                    ? const Text("Select a table or waiter to view details")
-                    : selected.toLowerCase() == "waiter"
-                        ? _waiterSection(context, filteredWaiterList, headerStyle, itemStyle)
-                        : _tableSection(context, filteredTableList, headerStyle, itemStyle),
-              ] else ...[
-                selected.isEmpty
-                    ? const Text("Select a table or waiter to view details")
-                    : selected.toLowerCase() == "waiter"
-                        ? _waiterSection(context, filteredWaiterList, headerStyle, itemStyle)
-                        : _tableSection(context, filteredTableList, headerStyle, itemStyle),
-              ],
+              selected.isEmpty
+                  ? const Text("Select a table or waiter to view details")
+                  : selected.toLowerCase() == "waiter"
+                      ? _waiterSection(context, filteredWaiterList, headerStyle, itemStyle, isNarrow)
+                      : _tableSection(context, filteredTableList, headerStyle, itemStyle, isNarrow),
             ],
           ),
         ),
@@ -111,7 +103,44 @@ class WaiterAndTable extends StatelessWidget {
     });
   }
 
-  Widget _waiterSection(BuildContext context, Iterable<dynamic> filteredWaiterList, TextStyle headerStyle, TextStyle itemStyle) {
+  Widget _waiterSection(BuildContext context, Iterable<dynamic> filteredWaiterList, TextStyle headerStyle, TextStyle itemStyle, bool isNarrow) {
+    if (isNarrow) {
+      return Column(
+        children: [
+          const SizedBox(height: 8),
+          if (filteredWaiterList.isEmpty)
+            const Center(child: Text("No Data", style: TextStyle(color: Colors.red, fontSize: 18)))
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: filteredWaiterList.length,
+              itemBuilder: (context, index) {
+                final item = filteredWaiterList.elementAt(index);
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+                  child: ListTile(
+                    title: Text(item['name'] ?? ''),
+                    subtitle: Text(item['phoneNumber']?.toString() ?? ''),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _showWaiterDetails(context, item, itemStyle),
+                  ),
+                );
+              },
+            ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton(onPressed: handleWaiter, child: const Text("Add Waiter")),
+              ElevatedButton(onPressed: handleWaiterExcel, child: const Text("Export To Excel")),
+            ],
+          ),
+        ],
+      );
+    }
+
+    // Desktop / wide layout (unchanged)
     return Column(
       children: [
         Container(
@@ -205,7 +234,44 @@ class WaiterAndTable extends StatelessWidget {
     );
   }
 
-  Widget _tableSection(BuildContext context, Iterable<dynamic> filteredTableList, TextStyle headerStyle, TextStyle itemStyle) {
+  Widget _tableSection(BuildContext context, Iterable<dynamic> filteredTableList, TextStyle headerStyle, TextStyle itemStyle, bool isNarrow) {
+    if (isNarrow) {
+      return Column(
+        children: [
+          const SizedBox(height: 8),
+          if (filteredTableList.isEmpty)
+            const Center(child: Text("No Data", style: TextStyle(color: Colors.red, fontSize: 18)))
+          else
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: filteredTableList.length,
+              itemBuilder: (context, index) {
+                final item = filteredTableList.elementAt(index);
+                return Card(
+                  margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+                  child: ListTile(
+                    title: Text(item['tableNo']?.toString() ?? ''),
+                    subtitle: Text("Capacity: ${item['capacity']?.toString() ?? ''}"),
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => _showTableDetails(context, item, itemStyle),
+                  ),
+                );
+              },
+            ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              ElevatedButton(onPressed: handleTable, child: const Text("Add Table")),
+              ElevatedButton(onPressed: handleTableExcel, child: const Text("Export To Excel")),
+            ],
+          ),
+        ],
+      );
+    }
+
+    // Desktop / wide layout (unchanged)
     return Column(
       children: [
         Container(
@@ -286,6 +352,127 @@ class WaiterAndTable extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+
+  void _showWaiterDetails(BuildContext context, dynamic item, TextStyle itemStyle) {
+    List<dynamic> prices = (item['price'] as List?) ?? [];
+    List<dynamic> tables = (item['tablesServed'] as List?)?.cast<int>() ?? [];
+
+    final totalSales = prices.fold<double>(0.0, (sum, price) {
+      if (price == null) return sum;
+      if (price is num) return sum + price.toDouble();
+      final parsed = double.tryParse(price.toString());
+      return sum + (parsed ?? 0.0);
+    });
+    final completedOrders = tables.length;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) {
+        return Padding(
+          padding: MediaQuery.of(context).viewInsets,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(item['name'] ?? '', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text("Sex: ${item['sex'] ?? ''}", style: itemStyle),
+                Text("Age: ${item['age']?.toString() ?? ''}", style: itemStyle),
+                Text("Experience: ${item['experience']?.toString() ?? ''}", style: itemStyle),
+                Text("Phone: ${item['phoneNumber']?.toString() ?? ''}", style: itemStyle),
+                Text("Completed Orders: $completedOrders", style: itemStyle),
+                Text("Sales: ${totalSales.toStringAsFixed(2)}", style: itemStyle),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        handleUpdateWaiter(item);
+                      },
+                      child: const Text("Edit"),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        handleDeleteWaiter(item);
+                      },
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      child: const Text("Delete"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showTableDetails(BuildContext context, dynamic item, TextStyle itemStyle) {
+    List<dynamic> prices = (item['price'] as List?) ?? [];
+    List<dynamic> payments = (item['payment'] as List?)?.cast<String>() ?? [];
+
+    final totalSales = prices.fold<double>(0.0, (sum, price) {
+      if (price == null) return sum;
+      if (price is num) return sum + price.toDouble();
+      final parsed = double.tryParse(price.toString());
+      return sum + (parsed ?? 0.0);
+    });
+    final completedOrders = payments.where((p) => p == "Paid").length;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) {
+        return Padding(
+          padding: MediaQuery.of(context).viewInsets,
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("Table ${item['tableNo']?.toString() ?? ''}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                Text("Capacity: ${item['capacity']?.toString() ?? ''}", style: itemStyle),
+                Text("Completed Orders: $completedOrders", style: itemStyle),
+                Text("Sales: ${totalSales.toStringAsFixed(2)}", style: itemStyle),
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        handleTableUpdate(item);
+                      },
+                      child: const Text("Edit"),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        handleDeleteTable(item);
+                      },
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                      child: const Text("Delete"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

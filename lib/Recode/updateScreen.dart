@@ -47,78 +47,81 @@ class UpdateScreen extends StatelessWidget {
       final maxContentWidth = min(780.0, constraints.maxWidth);
       final outerPadding = Responsive.horizontalPadding(context, desktop: 16, tablet: 16, mobile: 16, verticalDesktop: 30, verticalMobile: 20);
 
-      return Center(
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxContentWidth),
-          child: Container(
-            decoration: const BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.all(Radius.circular(20)),
-            ),
-            child: Padding(
-              padding: outerPadding,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Apptheme.mostbgcolor,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.grey.shade400.withOpacity(0.5),
-                      spreadRadius: 2,
-                      blurRadius: 10,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: Responsive.horizontalPadding(context, desktop: 100, tablet: 48, mobile: 16, verticalDesktop: 40, verticalMobile: 20),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        "$action Item",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                          color: Apptheme.mosttxtcolor.withOpacity(0.8),
-                        ),
+      return SingleChildScrollView(
+        padding: outerPadding.add(EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom)),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxContentWidth),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.all(Radius.circular(20)),
+              ),
+              child: Padding(
+                padding: outerPadding,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Apptheme.mostbgcolor,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.shade400.withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 10,
+                        offset: const Offset(0, 5),
                       ),
-                      const SizedBox(height: 30),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: Responsive.horizontalPadding(context, desktop: 100, tablet: 48, mobile: 16, verticalDesktop: 40, verticalMobile: 20),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          "$action Item",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 28,
+                            fontWeight: FontWeight.bold,
+                            color: Apptheme.mosttxtcolor.withOpacity(0.8),
+                          ),
+                        ),
+                        const SizedBox(height: 30),
 
-                      LayoutBuilder(builder: (context, inner) {
-                        if (inner.maxWidth < 700) {
-                          return Column(
+                        LayoutBuilder(builder: (context, inner) {
+                          if (inner.maxWidth < 700) {
+                            return Column(
+                              children: [
+                                _buildNameField(),
+                                const SizedBox(height: 16),
+                                _buildPriceField(),
+                              ],
+                            );
+                          }
+                          return Row(
                             children: [
-                              _buildNameField(),
-                              const SizedBox(height: 16),
-                              _buildPriceField(),
+                              Expanded(child: _buildNameField()),
+                              const SizedBox(width: 40),
+                              Expanded(child: _buildPriceField()),
                             ],
                           );
-                        }
-                        return Row(
-                          children: [
-                            Expanded(child: _buildNameField()),
-                            const SizedBox(width: 40),
-                            Expanded(child: _buildPriceField()),
-                          ],
-                        );
-                      }),
+                        }),
 
-                      const SizedBox(height: 30),
+                        const SizedBox(height: 30),
 
-                      // Category Dropdown
-                      _buildCategoryDropdown(),
-                      const SizedBox(height: 30),
+                        // Category Dropdown
+                        _buildCategoryDropdown(),
+                        const SizedBox(height: 30),
 
-                      // Image Uploading field
-                      _buildImageUploadArea(context),
-                      const SizedBox(height: 40),
+                        // Image Uploading field
+                        _buildImageUploadArea(context),
+                        const SizedBox(height: 40),
 
-                      // Action Button
-                      _buildActionButton(),
-                    ],
+                        // Action Button
+                        _buildActionButton(),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -277,32 +280,32 @@ class UpdateScreen extends StatelessWidget {
     );
   }
 
-Widget _buildImage() {
-  if (imageFood != null) {
-    return Image.file(
-      imageFood!,
-      fit: BoxFit.cover,
-      width: double.infinity,
-      height: double.infinity,
-    );
-  } 
-  else if (currentImageUrl != null && currentImageUrl!.isNotEmpty) {
-    return Image.network(
-      currentImageUrl!,
-      fit: BoxFit.cover,
-      width: double.infinity,
-      height: double.infinity,
-      loadingBuilder: (context, child, loadingProgress) {
-        if (loadingProgress == null) return child;
-        return const Center(child: CircularProgressIndicator());
-      },
-      errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
-    );
-  } 
-  else {
-    return _buildPlaceholder();
+  Widget _buildImage() {
+    if (imageFood != null) {
+      return Image.file(
+        imageFood!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+      );
+    } 
+    else if (currentImageUrl != null && currentImageUrl!.isNotEmpty) {
+      return Image.network(
+        currentImageUrl!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        height: double.infinity,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(child: CircularProgressIndicator());
+        },
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+      );
+    } 
+    else {
+      return _buildPlaceholder();
+    }
   }
-}
   Widget _buildPlaceholder() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,

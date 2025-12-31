@@ -531,7 +531,7 @@ class _CashierHomeState extends State<CashierHome> {
             ),
             SizedBox(width: 10),
             Text(
-              "${widget.HotelName} Cashier Panel",
+              "${widget.HotelName} Cashier",
               style: TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
