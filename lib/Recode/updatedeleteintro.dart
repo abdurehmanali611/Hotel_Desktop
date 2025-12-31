@@ -1,7 +1,8 @@
-// ignore_for_file: non_constant_identifier_names
+// ignore_for_file: non_constant_identifier_names, unnecessary_to_list_in_spreads
 
 import 'package:hotcol/utils/apptheme.dart';
 import 'package:flutter/material.dart';
+import 'package:hotcol/utils/responsive.dart';
 
 class UpdateDeleteIntro extends StatelessWidget {
   final void Function(dynamic) delete;
@@ -40,31 +41,48 @@ class UpdateDeleteIntro extends StatelessWidget {
         )
         .toList();
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 50),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: foodItems.map((item) => _buildItemCard(item)).toList(),
-            ),
+    return LayoutBuilder(builder: (context, constraints) {
+      final padding = Responsive.horizontalPadding(context, desktop: 30, tablet: 24, mobile: 16, verticalDesktop: 50, verticalMobile: 20);
+
+      if (constraints.maxWidth < 900) {
+        return SingleChildScrollView(
+          padding: padding,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              ...foodItems.map((item) => _buildItemCard(context, item)).toList(),
+              const SizedBox(height: 24),
+              ...drinkItems.map((item) => _buildItemCard(context, item)).toList(),
+            ],
           ),
-          const SizedBox(width: 30),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: drinkItems.map((item) => _buildItemCard(item)).toList(),
+        );
+      }
+
+      return SingleChildScrollView(
+        padding: padding,
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: foodItems.map((item) => _buildItemCard(context, item)).toList(),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+            const SizedBox(width: 30),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: drinkItems.map((item) => _buildItemCard(context, item)).toList(),
+              ),
+            ),
+          ],
+        ),
+      );
+    });
   }
 
-  Widget _buildItemCard(dynamic item) {
-    // Add a check to ensure the item is a valid map and has the required keys
+  Widget _buildItemCard(BuildContext context, dynamic item) {
     if (item is! Map<String, dynamic> ||
         !item.containsKey('name') ||
         !item.containsKey('imageUrl')) {
@@ -74,8 +92,12 @@ class UpdateDeleteIntro extends StatelessWidget {
     final String name = item['name'] ?? 'N/A';
     final String imageUrl = item['imageUrl'] ?? '';
 
+    final horizontalMargin = Responsive.isDesktop(context) ? 100.0 : 16.0;
+    final imageSize = Responsive.imageSizeFor(context, max: 230);
+    final imageHeight = imageSize * 0.68;
+
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 100, vertical: 20),
+      margin: EdgeInsets.symmetric(horizontal: horizontalMargin, vertical: 20),
       color: Apptheme.mostbgcolor,
       borderOnForeground: true,
       child: Padding(
@@ -93,8 +115,8 @@ class UpdateDeleteIntro extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Container(
-              width: 230,
-              height: 156,
+              width: imageSize,
+              height: imageHeight,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 color: Apptheme.mostbgcolor,
@@ -109,8 +131,7 @@ class UpdateDeleteIntro extends StatelessWidget {
                           if (loadingProgress == null) return child;
                           return const Center(
                             child: CircularProgressIndicator(
-                              color:
-                                  Apptheme.updatebg, // Use an appropriate color
+                              color: Apptheme.updatebg,
                             ),
                           );
                         },
@@ -154,7 +175,7 @@ class UpdateDeleteIntro extends StatelessWidget {
                             ),
                           ],
                         ),
-                      ), 
+                      ),
               ),
             ),
             const SizedBox(height: 10),

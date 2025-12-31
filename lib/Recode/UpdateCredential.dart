@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:hotcol/utils/apptheme.dart';
+import 'package:hotcol/utils/responsive.dart';
 
 class Updatecredential extends StatelessWidget {
   final String HotelName;
@@ -39,20 +40,11 @@ class Updatecredential extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(40), 
-      child: IntrinsicHeight(
+    final outerPad = Responsive.isDesktop(context) ? 40.0 : 16.0;
+    final dividerWidth = Responsive.isDesktop(context) ? 100.0 : 16.0;
+
+    Widget contentRow() {
+      return IntrinsicHeight(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -73,7 +65,7 @@ class Updatecredential extends StatelessWidget {
               ),
             ),
 
-            const VerticalDivider(width: 100, thickness: 1, color: Color(0xFFEEEEEE)),
+            VerticalDivider(width: dividerWidth, thickness: 1, color: Color(0xFFEEEEEE)),
 
             Expanded(
               child: _buildSectionColumn(
@@ -92,7 +84,64 @@ class Updatecredential extends StatelessWidget {
             ),
           ],
         ),
+      );
+    }
+
+    Widget contentColumn() {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _buildSectionColumn(
+            title: "Change Admin Password",
+            children: [
+              _buildLabel("Old Password:"),
+              _buildTextField(controller: oldPasswordController, hint: "Enter password", obscure: true),
+              _buildLabel("New Password:"),
+              _buildTextField(controller: newPasswordController, hint: "Enter password", obscure: true),
+              _buildLabel("Confirm Password:"),
+              _buildTextField(controller: confirmPasswordController, hint: "Enter password", obscure: true),
+              const SizedBox(height: 30),
+              _buildUpdateButton(type: "admin"),
+            ],
+          ),
+          const SizedBox(height: 20),
+          _buildSectionColumn(
+            title: "Update Other Credentials",
+            children: [
+              _buildLabel("Select Credential:"),
+              _buildDropdown(),
+              _buildLabel("Credential UserName:"),
+              _buildTextField(controller: usernameController, hint: "Enter Username"),
+              _buildLabel("Credential Password:"),
+              _buildTextField(controller: passwordController, hint: "Enter password", obscure: true),
+              const SizedBox(height: 30),
+              _buildUpdateButton(type: "cred"),
+            ],
+          ),
+        ],
+      );
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
+      padding: EdgeInsets.all(outerPad),
+      child: LayoutBuilder(builder: (context, constraints) {
+        if (Responsive.isMobile(context) || constraints.maxWidth < 700) {
+          return contentColumn();
+        } else {
+          return contentRow();
+        }
+      }),
     );
   }
 

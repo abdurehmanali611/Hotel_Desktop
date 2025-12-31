@@ -1,6 +1,7 @@
 // ignore_for_file: file_names, non_constant_identifier_names
 
 import 'package:flutter/material.dart';
+import 'package:hotcol/utils/responsive.dart';
 
 class Updatewaiter extends StatelessWidget {
   final Map<String, dynamic> initialWaiterData;
@@ -8,8 +9,8 @@ class Updatewaiter extends StatelessWidget {
   final TextEditingController ageController;
   final TextEditingController experienceController;
   final TextEditingController phoneController;
-  final String? selectedSex; 
-  final Function(String? newSex) onSexChanged; 
+  final String? selectedSex;
+  final Function(String? newSex) onSexChanged;
   final VoidCallback onCancel;
   final VoidCallback onUpdate;
   final String HotelName;
@@ -34,78 +35,83 @@ class Updatewaiter extends StatelessWidget {
       return const Center(child: Text("Waiter data not found."));
     }
 
-    // Since the state (controllers, selectedSex) is managed by the parent,
-    // this widget only handles presentation and calls the callbacks.
+    final outerPad = Responsive.horizontalPadding(context, desktop: 24, tablet: 20, mobile: 16, verticalDesktop: 20, verticalMobile: 12);
+
     return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: nameController,
-            decoration: const InputDecoration(
-              labelText: "Name",
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.name,
-          ),
-          const SizedBox(height: 16),
-          // Dropdown must trigger the parent state change via onSexChanged
-          DropdownButtonFormField<String>(
-            value: selectedSex,
-            hint: const Text("Choose Sex..."),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(),
-              labelText: "Sex",
-            ),
-            items: const [
-              DropdownMenuItem<String>(value: "Male", child: Text("Male")),
-              DropdownMenuItem<String>(value: "Female", child: Text("Female")),
-            ],
-            onChanged: onSexChanged,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: ageController,
-            decoration: const InputDecoration(
-              labelText: "Age",
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: experienceController,
-            decoration: const InputDecoration(
-              labelText: "Experience (Years)",
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: phoneController,
-            decoration: const InputDecoration(
-              labelText: "Phone Number",
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.phone,
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+      padding: outerPad,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 700),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              TextButton(
-                onPressed: onCancel,
-                child: const Text("Cancel"),
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: "Name",
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.name,
               ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: onUpdate,
-                child: const Text("Update"),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<String>(
+                value: selectedSex,
+                hint: const Text("Choose Sex..."),
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: "Sex",
+                ),
+                items: const [
+                  DropdownMenuItem<String>(value: "Male", child: Text("Male")),
+                  DropdownMenuItem<String>(value: "Female", child: Text("Female")),
+                ],
+                onChanged: onSexChanged,
               ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: ageController,
+                decoration: const InputDecoration(
+                  labelText: "Age",
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: experienceController,
+                decoration: const InputDecoration(
+                  labelText: "Experience (Years)",
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: phoneController,
+                decoration: const InputDecoration(
+                  labelText: "Phone Number",
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: onCancel,
+                    child: const Text("Cancel"),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: onUpdate,
+                    child: const Text("Update"),
+                  ),
+                ],
+              )
             ],
-          )
-        ],
+          ),
+        ),
       ),
     );
   }

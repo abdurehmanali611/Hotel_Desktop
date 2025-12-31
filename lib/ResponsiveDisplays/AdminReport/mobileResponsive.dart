@@ -1,7 +1,8 @@
-// ignore_for_file: file_names
+// ignore_for_file: file_names, unnecessary_to_list_in_spreads
 
 import 'package:flutter/material.dart';
 import 'package:hotcol/utils/apptheme.dart';
+import 'package:hotcol/utils/responsive.dart';
 
 class Mobileresponsive extends StatelessWidget {
   final List<Map<String, dynamic>> foodItems;
@@ -25,18 +26,18 @@ class Mobileresponsive extends StatelessWidget {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildItemsList("Food Items", foodItems),
+              _buildItemsList(context, "Food Items", foodItems),
               const SizedBox(height: 30),
-              _buildItemsList("Drink Items", drinkItems)
+              _buildItemsList(context, "Drink Items", drinkItems)
             ],
           );
         } else {
           return Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(child: _buildItemsList("Food Items", foodItems)),
+              Expanded(child: _buildItemsList(context, "Food Items", foodItems)),
               const SizedBox(width: 20),
-              Expanded(child: _buildItemsList("Drink Items", drinkItems))
+              Expanded(child: _buildItemsList(context, "Drink Items", drinkItems))
             ],
           );
         }
@@ -44,20 +45,24 @@ class Mobileresponsive extends StatelessWidget {
     );
   }
 
-  Widget _buildItemsList(String title, List<Map<String, dynamic>> items) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title, style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Apptheme.mosttxtcolor
+  Widget _buildItemsList(BuildContext context, String title, List<Map<String, dynamic>> items) {
+    final padding = Responsive.horizontalPadding(context, desktop: 24, tablet: 24, mobile: 16, verticalDesktop: 0, verticalMobile: 0);
+    return Padding(
+      padding: padding,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title, style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Apptheme.mosttxtcolor
+            ),
           ),
-        ),
-        const SizedBox(height: 16),
-        ...items.map((item) => buildItemCard(item, filteredItems))
-      ],
+          const SizedBox(height: 16),
+          ...items.map((item) => buildItemCard(item, filteredItems)).toList()
+        ],
+      ),
     );
   }
 }

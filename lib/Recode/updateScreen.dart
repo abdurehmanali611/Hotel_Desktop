@@ -1,9 +1,11 @@
 // ignore_for_file: file_names
 
 import 'dart:io';
+import 'dart:math';
 
 import 'package:hotcol/utils/apptheme.dart';
 import 'package:flutter/material.dart';
+import 'package:hotcol/utils/responsive.dart';
 
 class UpdateScreen extends StatelessWidget {
   final void Function(String) nameChanged;
@@ -41,69 +43,90 @@ class UpdateScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.all(Radius.circular(20)),
-      ),
-      width: 780,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(),
-        child: Container(
-          decoration: BoxDecoration(
-            color: Apptheme.mostbgcolor,
-            borderRadius: BorderRadius.circular(20),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.shade400.withOpacity(0.5),
-                spreadRadius: 2,
-                blurRadius: 10,
-                offset: const Offset(0, 5),
-              ),
-            ],
-          ),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 40),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Text(
-                  "$action Item",
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Apptheme.mosttxtcolor.withOpacity(0.8),
-                  ),
-                ),
-                const SizedBox(height: 30),
+    return LayoutBuilder(builder: (context, constraints) {
+      final maxContentWidth = min(780.0, constraints.maxWidth);
+      final outerPadding = Responsive.horizontalPadding(context, desktop: 16, tablet: 16, mobile: 16, verticalDesktop: 30, verticalMobile: 20);
 
-                Row(
-                  children: [
-                    Expanded(child: _buildNameField()),
-                    const SizedBox(width: 40),
-                    Expanded(child: _buildPriceField()),
+      return Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: maxContentWidth),
+          child: Container(
+            decoration: const BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.all(Radius.circular(20)),
+            ),
+            child: Padding(
+              padding: outerPadding,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Apptheme.mostbgcolor,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.grey.shade400.withOpacity(0.5),
+                      spreadRadius: 2,
+                      blurRadius: 10,
+                      offset: const Offset(0, 5),
+                    ),
                   ],
                 ),
-                const SizedBox(height: 30),
+                child: Padding(
+                  padding: Responsive.horizontalPadding(context, desktop: 100, tablet: 48, mobile: 16, verticalDesktop: 40, verticalMobile: 20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        "$action Item",
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                          color: Apptheme.mosttxtcolor.withOpacity(0.8),
+                        ),
+                      ),
+                      const SizedBox(height: 30),
 
-                // Category Dropdown
-                _buildCategoryDropdown(),
-                const SizedBox(height: 30),
+                      LayoutBuilder(builder: (context, inner) {
+                        if (inner.maxWidth < 700) {
+                          return Column(
+                            children: [
+                              _buildNameField(),
+                              const SizedBox(height: 16),
+                              _buildPriceField(),
+                            ],
+                          );
+                        }
+                        return Row(
+                          children: [
+                            Expanded(child: _buildNameField()),
+                            const SizedBox(width: 40),
+                            Expanded(child: _buildPriceField()),
+                          ],
+                        );
+                      }),
 
-                // Image Uploading field
-                _buildImageUploadArea(context),
-                const SizedBox(height: 40),
+                      const SizedBox(height: 30),
 
-                // Action Button
-                _buildActionButton(),
-              ],
+                      // Category Dropdown
+                      _buildCategoryDropdown(),
+                      const SizedBox(height: 30),
+
+                      // Image Uploading field
+                      _buildImageUploadArea(context),
+                      const SizedBox(height: 40),
+
+                      // Action Button
+                      _buildActionButton(),
+                    ],
+                  ),
+                ),
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildTextField({
@@ -219,6 +242,7 @@ class UpdateScreen extends StatelessWidget {
   }
 
   Widget _buildImageUploadArea(BuildContext context) {
+    final imageSize = Responsive.imageSizeFor(context, max: 230);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -235,16 +259,17 @@ class UpdateScreen extends StatelessWidget {
           cursor: SystemMouseCursors.click,
           child: GestureDetector(
             onTap: fileUpload,
-            child: Container(
-              height: 156,
-              width: 230,
-              margin: EdgeInsets.symmetric(horizontal: 180),
-              decoration: BoxDecoration(
-                color: Apptheme.mostbgcolor,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.grey, width: 1.5),
+            child: Center(
+              child: Container(
+                height: imageSize,
+                width: imageSize,
+                decoration: BoxDecoration(
+                  color: Apptheme.mostbgcolor,
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: Colors.grey, width: 1.5),
+                ),
+                child: Center(child: _buildImage()),
               ),
-              child: Center(child: _buildImage()),
             ),
           ),
         ),

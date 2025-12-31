@@ -3,6 +3,7 @@
 import 'package:hotcol/ResponsiveDisplays/AdminReport/mobileResponsive.dart';
 import 'package:hotcol/utils/apptheme.dart';
 import 'package:flutter/material.dart';
+import 'package:hotcol/utils/responsive.dart';
 import 'package:intl/intl.dart';
 
 class Reports extends StatelessWidget {
@@ -136,7 +137,8 @@ class Reports extends StatelessWidget {
                       foodItems: foodItems,
                       drinkItems: drinkItems,
                       filteredItems: filteredItems,
-                      buildItemCard: _buildItemCard
+                      buildItemCard: (item, filtered) =>
+                          _buildItemCard(context, item, filtered),
                     ),
                     const SizedBox(height: 20),
                     Text(
@@ -159,8 +161,14 @@ class Reports extends StatelessWidget {
     );
   }
 
-  Widget _buildItemCard(dynamic item, List<dynamic> allItems) {
+  Widget _buildItemCard(
+    BuildContext context,
+    dynamic item,
+    List<dynamic> allItems,
+  ) {
     final orderAmount = item['orderAmount'] ?? 1;
+    final imageWidth = Responsive.imageSizeFor(context, max: 100);
+    final imageHeight = imageWidth * 0.9;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -183,13 +191,13 @@ class Reports extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
               child: Image.network(
                 item['imageUrl'],
-                width: 100,
-                height: 90,
+                width: imageWidth,
+                height: imageHeight,
                 fit: BoxFit.cover,
                 errorBuilder: (context, error, stackTrace) {
                   return Container(
-                    width: 100,
-                    height: 90,
+                    width: imageWidth,
+                    height: imageHeight,
                     color: Apptheme.containerlogin,
                     child: const Icon(
                       Icons.fastfood_outlined,

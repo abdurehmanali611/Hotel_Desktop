@@ -1,9 +1,11 @@
 // ignore_for_file: file_names
 
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:hotcol/ResponsiveDisplays/CreatingItem/subResponsive/priceAndName.dart';
+import 'package:hotcol/utils/responsive.dart';
 
 class Responsivecreater extends StatelessWidget {
   final void Function(String) nameChanged;
@@ -45,7 +47,7 @@ class Responsivecreater extends StatelessWidget {
         ),
       ),
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 50, horizontal: 20),
+        padding: Responsive.horizontalPadding(context, desktop: 20, tablet: 20, mobile: 16, verticalDesktop: 50, verticalMobile: 30),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -60,7 +62,7 @@ class Responsivecreater extends StatelessWidget {
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 100, vertical: 30),
+            padding: Responsive.horizontalPadding(context, desktop: 100, tablet: 48, mobile: 16, verticalDesktop: 30, verticalMobile: 20),
             child: Column(
               children: [
                 Priceandname(
@@ -134,83 +136,84 @@ class Responsivecreater extends StatelessWidget {
                       cursor: SystemMouseCursors.click,
                       child: GestureDetector(
                         onTap: fileUpload,
-                        child: Container(
-                          width: 200,
-                          height: 200,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFF5F5F5),
-                            borderRadius: BorderRadius.circular(20),
-                            border: Border.all(
-                              color: const Color(0xFFE0E0E0),
-                              width: 2,
-                              style: BorderStyle.solid,
+                        child: LayoutBuilder(builder: (context, constraints) {
+                          final imageSize = Responsive.imageSizeFor(context, max: 200);
+                          return Container(
+                            width: imageSize,
+                            height: imageSize,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF5F5F5),
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: const Color(0xFFE0E0E0),
+                                width: 2,
+                                style: BorderStyle.solid,
+                              ),
                             ),
-                          ),
-                          child: imageFood != null
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(18),
-                                  child: Image.file(
-                                    imageFood!,
-                                    width: 200,
-                                    height: 200,
-                                    fit: BoxFit.cover,
-                                  ),
-                                )
-                              : (imageUrl != null && imageUrl!.isNotEmpty)
-                              ? ClipRRect(
-                                  borderRadius: BorderRadius.circular(18),
-                                  child: Image.network(
-                                    imageUrl!,
-                                    width: 200,
-                                    height: 200,
-                                    fit: BoxFit.cover,
-                                    loadingBuilder: (context, child, progress) {
-                                      if (progress == null) return child;
-                                      return const Center(
-                                        child: CircularProgressIndicator(),
-                                      );
-                                    },
-                                    errorBuilder: (context, error, stack) =>
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.add_photo_alternate_rounded,
-                                              size: 80,
-                                              color: Colors.grey.shade500,
-                                            ),
-                                            const SizedBox(height: 8),
-                                            const Text(
-                                              "Tap to upload",
-                                              style: TextStyle(
-                                                color: Color(0xFF666666),
-                                                fontSize: 16,
+                            child: imageFood != null
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(18),
+                                    child: Image.file(
+                                      imageFood!,
+                                      width: imageSize,
+                                      height: imageSize,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  )
+                                : (imageUrl != null && imageUrl!.isNotEmpty)
+                                    ? ClipRRect(
+                                        borderRadius: BorderRadius.circular(18),
+                                        child: Image.network(
+                                          imageUrl!,
+                                          width: imageSize,
+                                          height: imageSize,
+                                          fit: BoxFit.cover,
+                                          loadingBuilder: (context, child, progress) {
+                                            if (progress == null) return child;
+                                            return const Center(
+                                              child: CircularProgressIndicator(),
+                                            );
+                                          },
+                                          errorBuilder: (context, error, stack) => Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.add_photo_alternate_rounded,
+                                                size: imageSize * 0.4,
+                                                color: Colors.grey.shade500,
                                               ),
-                                            ),
-                                          ],
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                "Tap to upload",
+                                                style: TextStyle(
+                                                  color: const Color(0xFF666666),
+                                                  fontSize: max(12, imageSize * 0.08),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                  ),
-                                )
-                              : Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      Icons.add_photo_alternate_rounded,
-                                      size: 80,
-                                      color: Colors.grey.shade500,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    const Text(
-                                      "Tap to upload",
-                                      style: TextStyle(
-                                        color: Color(0xFF666666),
-                                        fontSize: 16,
+                                      )
+                                    : Column(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.add_photo_alternate_rounded,
+                                            size: imageSize * 0.4,
+                                            color: Colors.grey.shade500,
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            "Tap to upload",
+                                            style: TextStyle(
+                                              color: const Color(0xFF666666),
+                                              fontSize: max(12, imageSize * 0.08),
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                        ),
+                          );
+                        }),
                       ),
                     ),
                     const SizedBox(height: 30),

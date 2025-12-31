@@ -1,6 +1,7 @@
 // ignore_for_file: file_names, non_constant_identifier_names
 
 import 'package:flutter/material.dart';
+import 'package:hotcol/utils/responsive.dart';
 
 class Updatetable extends StatelessWidget {
   final Map<String, dynamic> initialTableData;
@@ -26,43 +27,51 @@ class Updatetable extends StatelessWidget {
       return const Center(child: Text("Table data not found."));
     }
 
+    final outerPadding = Responsive.horizontalPadding(context, desktop: 24, tablet: 20, mobile: 16, verticalDesktop: 20, verticalMobile: 12);
+
     return SingleChildScrollView(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: tableNoController,
-            decoration: const InputDecoration(
-              labelText: "Table Number",
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 16),
-          TextField(
-            controller: capacityController,
-            decoration: const InputDecoration(
-              labelText: "Capacity",
-              border: OutlineInputBorder(),
-            ),
-            keyboardType: TextInputType.number,
-          ),
-          const SizedBox(height: 20),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+      padding: outerPadding,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 700),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              TextButton(
-                onPressed: onCancel,
-                child: const Text("Cancel"),
+              TextField(
+                controller: tableNoController,
+                decoration: const InputDecoration(
+                  labelText: "Table Number",
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
               ),
-              const SizedBox(width: 8),
-              ElevatedButton(
-                onPressed: onUpdate,
-                child: const Text("Update"),
+              const SizedBox(height: 16),
+              TextField(
+                controller: capacityController,
+                decoration: const InputDecoration(
+                  labelText: "Capacity",
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.number,
               ),
+              const SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: onCancel,
+                    child: const Text("Cancel"),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    onPressed: onUpdate,
+                    child: const Text("Update"),
+                  ),
+                ],
+              )
             ],
-          )
-        ],
+          ),
+        ),
       ),
     );
   }

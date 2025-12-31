@@ -1,8 +1,10 @@
 // ignore_for_file: non_constant_identifier_names
 
+import 'dart:math';
 import 'package:hotcol/utils/apptheme.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'package:hotcol/utils/responsive.dart';
 
 class Barista extends StatefulWidget {
   final String HotelName;
@@ -51,21 +53,12 @@ class _BaristaState extends State<Barista> {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(90),
-              child: Image(
-                image: Image.network(widget.Logo).image,
-                width: 50,
-                height: 50,
-                fit: BoxFit.cover,
-              ),
+              child: Image(image: Image.network(widget.Logo).image, width: 50, height: 50, fit: BoxFit.cover),
             ),
-            SizedBox(width: 10),
+            const SizedBox(width: 10),
             Text(
               "${widget.HotelName} Barista",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                fontFamily: "NotoSerif",
-              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, fontFamily: "NotoSerif"),
             ),
           ],
         ),
@@ -74,222 +67,108 @@ class _BaristaState extends State<Barista> {
       body: Center(
         child: Query(
           options: QueryOptions(document: gql(barOrderQuery)),
-          builder:
-              (
-                QueryResult result, {
-                VoidCallback? refetch,
-                FetchMore? fetchMore,
-              }) {
-                if (result.isLoading) {
-                  return Center(child: CircularProgressIndicator());
-                }
+          builder: (QueryResult result, {VoidCallback? refetch, FetchMore? fetchMore}) {
+            if (result.isLoading) return const Center(child: CircularProgressIndicator());
 
-                if (result.hasException) {
-                  return Center(
-                    child: Text(
-                      "Error fetching data. Details: ${result.exception.toString().split(':')[0]}",
-                      style: TextStyle(color: Colors.red, fontSize: 16),
-                      textAlign: TextAlign.center,
-                    ),
-                  );
-                }
+            if (result.hasException) {
+              return Center(
+                child: Text(
+                  "Error fetching data. Details: ${result.exception.toString().split(':')[0]}",
+                  style: const TextStyle(color: Colors.red, fontSize: 16),
+                  textAlign: TextAlign.center,
+                ),
+              );
+            }
 
-                final items = (result.data?['orders'] as List<dynamic>?) ?? [];
-                Iterable<dynamic> filteredItems = [];
+            final items = (result.data?['orders'] as List<dynamic>?) ?? [];
+            Iterable<dynamic> filteredItems = [];
 
-                try {
-                  filteredItems = items.where((item) {
-                    return item['status'] == null &&
-                        item['category'].toString().toLowerCase() == "drink" &&
-                        item['HotelName'] == widget.HotelName;
-                  });
-                } catch (e) {
-                  return Center(
-                    child: Text(
-                      "Internal error: Could not process fetched data.",
-                      style: TextStyle(color: Colors.red, fontSize: 16),
-                    ),
-                  );
-                }
+            try {
+              filteredItems = items.where((item) {
+                return item['status'] == null &&
+                    item['category'].toString().toLowerCase() == "drink" &&
+                    item['HotelName'] == widget.HotelName;
+              });
+            } catch (e) {
+              return const Center(child: Text("Internal error: Could not process fetched data.", style: TextStyle(color: Colors.red, fontSize: 16)));
+            }
 
-                return Mutation(
-                  options: MutationOptions(
-                    document: gql(statusUpdateMutation),
-                    onCompleted: (data) {
-                      refetch?.call();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text("Status Updated Successfully"),
-                          duration: Duration(seconds: 2),
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    },
-                    onError: (error) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text(
-                            "Something Went Wrong. Please Try Again",
+            return Mutation(
+              options: MutationOptions(
+                document: gql(statusUpdateMutation),
+                onCompleted: (data) {
+                  refetch?.call();
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Status Updated Successfully"), duration: Duration(seconds: 2), backgroundColor: Colors.green));
+                },
+                onError: (error) {
+                  ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Something Went Wrong. Please Try Again"), duration: Duration(seconds: 2), backgroundColor: Colors.red));
+                },
+              ),
+              builder: (RunMutation runMutation, QueryResult? result) {
+                return LayoutBuilder(builder: (context, constraints) {
+                  final padding = Responsive.horizontalPadding(context, desktop: 80, tablet: 40, mobile: 16, verticalDesktop: 20, verticalMobile: 12);
+                  final cardWidth = min(600.0, constraints.maxWidth * 0.9);
+                  final imageWidth = Responsive.imageSizeFor(context, max: 250);
+                  return SingleChildScrollView(
+                    padding: EdgeInsets.symmetric(horizontal: padding.horizontal / 2, vertical: padding.vertical / 2),
+                    child: Column(
+                      children: filteredItems.map((item) {
+                        return Container(
+                          width: cardWidth,
+                          padding: const EdgeInsets.all(25),
+                          margin: EdgeInsets.symmetric(vertical: 20, horizontal: max(8, (constraints.maxWidth - cardWidth) / 2)),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            boxShadow: [BoxShadow(color: Colors.grey.withOpacity(0.3), spreadRadius: 5, blurRadius: 10, offset: const Offset(0, 5))],
                           ),
-                          duration: Duration(seconds: 2),
-                          backgroundColor: Colors.red,
-                        ),
-                      );
-                    },
-                  ),
-                  builder: (RunMutation runMutation, QueryResult? result) {
-                    return SizedBox(
-                      width: double.infinity,
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 80),
-                        itemCount: filteredItems.length,
-                        itemBuilder: (context, index) {
-                          final item = filteredItems.elementAt(index);
-                          return Container(
-                            width: 250,
-                            height: 440,
-                            padding: const EdgeInsets.all(25),
-                            margin: const EdgeInsets.symmetric(
-                              horizontal: 370,
-                              vertical: 40,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(20),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.withOpacity(0.3),
-                                  spreadRadius: 5,
-                                  blurRadius: 10,
-                                  offset: const Offset(0, 5),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(item['title'], style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, fontFamily: "NotoSerif", color: Apptheme.mosttxtcolor), textAlign: TextAlign.center),
+                              const SizedBox(height: 15),
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(20),
+                                child: Image.network(
+                                  item['imageUrl'],
+                                  width: imageWidth,
+                                  height: imageWidth * 0.88,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 120),
                                 ),
-                              ],
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  item['title'],
-                                  style: TextStyle(
-                                    fontSize: 28,
-                                    fontWeight: FontWeight.bold,
-                                    fontFamily: "NotoSerif",
-                                    color: Apptheme.mosttxtcolor,
-                                  ),
-                                  textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 15),
+                              Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                const Text("Table No:", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Apptheme.mosttxtcolor)),
+                                Text(" ${item['tableNo']}", style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black)),
+                              ]),
+                              const SizedBox(height: 25),
+                              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                                ElevatedButton(
+                                  onPressed: () {
+                                    runMutation({"id": item['id'], "status": "Cancelled"});
+                                  },
+                                  style: ElevatedButton.styleFrom(backgroundColor: Apptheme.buttonbglogin, foregroundColor: Apptheme.buttontxt, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)), elevation: 5),
+                                  child: const Text("Cancel", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                                 ),
-                                const SizedBox(height: 15),
-                                ClipRRect(
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Image.network(
-                                    item['imageUrl'],
-                                    width: 250,
-                                    height: 220,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Icon(
-                                        Icons.broken_image,
-                                        size: 200,
-                                      );
-                                    },
-                                  ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    runMutation({"id": item['id'], "status": "Completed"});
+                                  },
+                                  style: ElevatedButton.styleFrom(backgroundColor: Apptheme.buttonbglogin, foregroundColor: Apptheme.buttontxt, padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 15), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)), elevation: 5),
+                                  child: const Text("Done", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                                 ),
-                                const SizedBox(height: 15),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Text(
-                                      "Table No:",
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Apptheme.mosttxtcolor,
-                                      ),
-                                    ),
-                                    Text(
-                                      " ${item['tableNo']}",
-                                      style: TextStyle(
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 25),
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        runMutation({
-                                          "id": item['id'],
-                                          "status": "Cancelled",
-                                        });
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Apptheme.buttonbglogin,
-                                        foregroundColor: Apptheme.buttontxt,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 40,
-                                          vertical: 15,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            30,
-                                          ),
-                                        ),
-                                        elevation: 5,
-                                      ),
-                                      child: const Text(
-                                        "Cancel",
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                    ElevatedButton(
-                                      onPressed: () {
-                                        runMutation({
-                                          "id": item['id'],
-                                          "status": "Completed",
-                                        });
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Apptheme.buttonbglogin,
-                                        foregroundColor: Apptheme.buttontxt,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 40,
-                                          vertical: 15,
-                                        ),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            30,
-                                          ),
-                                        ),
-                                        elevation: 5,
-                                      ),
-                                      child: const Text(
-                                        "Done",
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
-                    );
-                  },
-                );
+                              ]),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  );
+                });
               },
+            );
+          },
         ),
       ),
     );

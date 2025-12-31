@@ -1,5 +1,7 @@
+import 'dart:math';
 import 'package:hotcol/utils/apptheme.dart';
 import 'package:flutter/material.dart';
+import 'package:hotcol/utils/responsive.dart';
 
 class GrantCredential extends StatelessWidget {
   final String kitchen;
@@ -28,8 +30,17 @@ class GrantCredential extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final outerPadding = Responsive.horizontalPadding(
+      context,
+      desktop: 450,
+      tablet: 48,
+      mobile: 16,
+      verticalDesktop: 50,
+      verticalMobile: 30,
+    );
+
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 450, vertical: 50),
+      padding: outerPadding,
       decoration: BoxDecoration(color: Colors.white),
       child: Container(
         padding: EdgeInsets.only(left: 50, top: 10, bottom: 10, right: 10),
@@ -38,126 +49,131 @@ class GrantCredential extends StatelessWidget {
           border: Border.all(color: Colors.black, width: 2),
           borderRadius: BorderRadius.circular(20),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: Container(
-                width: 150,
-                height: 38,
-                padding: EdgeInsets.only(left: 10),
-                alignment: Alignment.topRight,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Apptheme.mostbgcolor,
+        child: LayoutBuilder(builder: (context, constraints) {
+          final fieldWidth = min(250.0, constraints.maxWidth * 0.6);
+          final dropdownWidth = min(150.0, constraints.maxWidth * 0.35);
+
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Align(
+                alignment: Alignment.centerRight,
+                child: Container(
+                  width: dropdownWidth,
+                  height: 38,
+                  padding: EdgeInsets.only(left: 10),
+                  alignment: Alignment.topRight,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: Apptheme.mostbgcolor,
+                  ),
+                  child: DropdownButton(
+                    value: dropValue,
+                    items: [
+                      DropdownMenuItem(value: kitchen, child: Text(kitchen)),
+                      DropdownMenuItem(value: barista, child: Text(barista)),
+                      DropdownMenuItem(value: cashier, child: Text(cashier)),
+                    ],
+                    onChanged: handleStake,
+                    isExpanded: true,
+                    dropdownColor: Apptheme.mostbgcolor,
+                    borderRadius: BorderRadius.circular(20),
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.normal,
+                      color: Apptheme.buttontxt,
+                    ),
+                    underline: Container(),
+                  ),
                 ),
-                child: DropdownButton(
-                  value: dropValue,
-                  items: [
-                    DropdownMenuItem(value: kitchen, child: Text(kitchen)),
-                    DropdownMenuItem(value: barista, child: Text(barista)),
-                    DropdownMenuItem(value: cashier, child: Text(cashier)),
-                  ],
-                  onChanged: handleStake,
-                  isExpanded: true,
-                  dropdownColor: Apptheme.mostbgcolor,
-                  borderRadius: BorderRadius.circular(20),
-                  style: TextStyle(
+              ),
+              const SizedBox(height: 10),
+              Text(
+                title_1,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.start,
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: SizedBox(
+                  height: 35,
+                  width: fieldWidth,
+                  child: TextField(
+                    controller: credUsername,
+                    decoration: InputDecoration(
+                      hintText: "Enter Username",
+                      fillColor: Apptheme.mostbgcolor,
+                      filled: true,
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
+                title_2,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.start,
+              ),
+              const SizedBox(height: 8),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: SizedBox(
+                  height: 35,
+                  width: fieldWidth,
+                  child: TextField(
+                    controller: credPassword,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      hintText: "Enter password",
+                      fillColor: Apptheme.mostbgcolor,
+                      filled: true,
+                      border: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.black, width: 1.5),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 10,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 25),
+              Align(
+                alignment: Alignment.center,
+                child: ElevatedButton(
+                  onPressed: handleGrant,
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all(Apptheme.buttonbglogin),
+                    foregroundColor: MaterialStateProperty.all(Apptheme.buttontxt)
+                  ),
+                  child: Text("Grant", style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.normal,
-                    color: Apptheme.buttontxt,
-                  ),
-                  underline: Container(),
+                    fontWeight: FontWeight.normal
+                  ),),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              title_1,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                fontStyle: FontStyle.italic,
-              ),
-              textAlign: TextAlign.start,
-            ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: SizedBox(
-                height: 35,
-                width: 250,
-                child: TextField(
-                  controller: credUsername,
-                  decoration: InputDecoration(
-                    hintText: "Enter Username",
-                    fillColor: Apptheme.mostbgcolor,
-                    filled: true,
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black, width: 1.5),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 10,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              title_2,
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                fontStyle: FontStyle.italic,
-              ),
-              textAlign: TextAlign.start,
-            ),
-            const SizedBox(height: 8),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: SizedBox(
-                height: 35,
-                width: 250,
-                child: TextField(
-                  controller: credPassword,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                    hintText: "Enter password",
-                    fillColor: Apptheme.mostbgcolor,
-                    filled: true,
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.black, width: 1.5),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    contentPadding: EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 10,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 25),
-            Align(
-              alignment: Alignment.center,
-              child: ElevatedButton(
-                onPressed: handleGrant,
-                style: ButtonStyle(
-                  backgroundColor: WidgetStateProperty.all(Apptheme.buttonbglogin),
-                  foregroundColor: WidgetStateProperty.all(Apptheme.buttontxt)
-                ),
-                child: Text("Grant", style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.normal
-                ),),
-              ),
-            ),
-          ],
-        ),
+            ],
+          );
+        }),
       ),
     );
   }
